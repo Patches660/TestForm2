@@ -1,0 +1,152 @@
+/**
+ * Динамическая загрузка компонентов хедера и футера + переключатель языка на флагах.
+ *
+ * Хедер и футер хранятся в /components/header.html и /components/footer.html
+ * (единый источник правды на оба языка). Язык определяется по
+ * document.documentElement.lang. Все пути в партиалах — корне-относительные,
+ * поэтому один компонент работает и из корня, и из подпапок /en/ и /ru/.
+ */
+
+/**
+ * Чистая функция: по текущему pathname вычисляет URL этой же страницы
+ * на английском и русском. Вынесена отдельно и без обращений к DOM,
+ * чтобы её можно было юнит-тестировать в Node (см. tests/lang-router.test.mjs).
+ *
+ * Карта URL:
+ *   /                       -> en: /        ru: /ru/
+ *   /index.html             -> en: /        ru: /ru/
+ *   /en/<file>              -> en: /en/<file>   ru: /ru/<file>
+ *   /ru/ или /ru/index.html -> en: /        ru: /ru/
+ *   /ru/<file>              -> en: /en/<file>   ru: /ru/<file>
+ */
+function computeLangUrls(pathname) {
+    const parts = pathname.split('/').filter(function (p) { return p !== ''; });
+
+    // Корень сайта (английская главная)
+    if (parts.length === 0) {
+        return { en: '/', ru: '/ru/' };
+    }
+
+    if (parts[0] === 'en' || parts[0] === 'ru') {
+        const rest = parts.slice(1);
+        // /en/, /ru/, /en/index.html, /ru/index.html -> главные страницы
+        if (rest.length === 0 || (rest.length === 1 && rest[0] === 'index.html')) {
+            return { en: '/', ru: '/ru/' };
+        }
+        const file = rest.join('/');
+        return { en: '/en/' + file, ru: '/ru/' + file };
+    }
+
+    // /index.html в корне -> английская главная
+    if (parts.length === 1 && parts[0] === 'index.html') {
+        return { en: '/', ru: '/ru/' };
+    }
+
+    // Любой другой файл в корне (на практике не встречается, но безопасно)
+    const file = parts.join('/');
+    return { en: '/' + file, ru: '/ru/' + file };
+}
+
+async function loadComponent(elementId, componentPath) {
+    const placeholder = document.getElementById(elementId);
+    if (!placeholder) return null;
+
+    try {
+        const response = await fetch(componentPath);
+        if (!response.ok) {
+            console.error('Ошибка при загрузке компонента: ' + componentPath, response.status);
+            return null;
+        }
+        placeholder.innerHTML = await response.text();
+        return placeholder;
+    } catch (error) {
+        console.error('Ошибка сети при загрузке компонента: ' + componentPath, error);
+        return null;
+    }
+}
+
+/**
+ * Подставляет тексты футера и нужную ссылку «Поддержать автора» по языку.
+ */
+function applyFooterLanguage(lang) {
+    const footer = document.getElementById('footer-placeholder');
+    if (!footer) return;
+
+    footer.querySelectorAll('[data-' + lang + ']').forEach(function (el) {
+        const text = el.getAttribute('data-' + lang);
+        if (text) el.textContent = text;
+    });
+
+    const thanks = footer.querySelector('.footer-thanks');
+    if (thanks) {
+        const href = thanks.getAttribute('data-href-' + lang);
+        if (href) thanks.setAttribute('href', href);
+    }
+}
+
+/**
+ * Настраивает переключатель языка: проставляет корректные ссылки на обе
+ * языковые версии текущей страницы, подсвечивает флаг текущего языка и
+ * вешает анимированный переход на клик по второму флагу.
+ */
+function initLanguageSwitcher(lang) {
+    const switcher = document.querySelector('.language-switcher');
+    if (!switcher) return;
+
+    const urls = computeLangUrls(window.location.pathname);
+    const enFlag = switcher.querySelector('[data-lang="en"]');
+    const ruFlag = switcher.querySelector('[data-lang="ru"]');
+
+    if (enFlag) enFlag.setAttribute('href', urls.en);
+    if (ruFlag) ruFlag.setAttribute('href', urls.ru);
+
+    // Логотип ведёт на главную текущего языка
+    const logo = document.querySelector('.logo-link');
+    if (logo) logo.setAttribute('href', lang === 'ru' ? '/ru/' : '/');
+
+    const current = lang === 'ru' ? ruFlag : enFlag;
+    const other = lang === 'ru' ? enFlag : ruFlag;
+    if (current) current.classList.add('active');
+    if (!other) return;
+
+    other.addEventListener('click', function (event) {
+        event.preventDefault();
+        const target = other.getAttribute('href');
+
+        const reduceMotion = window.matchMedia
+            && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        if (reduceMotion) {
+            window.location.href = target;
+            return;
+        }
+
+        // Перекидываем подсветку на выбранный флаг — запускает CSS-анимацию
+        if (current) current.classList.remove('active');
+        other.classList.add('active');
+        switcher.classList.add('switching');
+
+        // Переходим после завершения анимации
+        window.setTimeout(function () {
+            window.location.href = target;
+        }, 280);
+    });
+}
+
+if (typeof document !== 'undefined') {
+    document.addEventListener('DOMContentLoaded', async function () {
+        const lang = document.documentElement.lang || 'en';
+
+        await Promise.all([
+            loadComponent('header-placeholder', '/components/header.html'),
+            loadComponent('footer-placeholder', '/components/footer.html')
+        ]);
+
+        applyFooterLanguage(lang);
+        initLanguageSwitcher(lang);
+    });
+}
+
+// Экспорт чистой логики для юнит-тестов в Node (в браузере просто игнорируется)
+if (typeof module !== 'undefined' && module.exports) {
+    module.exports = { computeLangUrls };
+}

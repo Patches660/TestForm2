@@ -1,0 +1,752 @@
+// Eldoria Expedition Form - Version 2.0 (Bug-Free Production Version)
+
+const i18n = {
+    en: {
+        "title": "Register for the Expedition in search of Eldoria",
+        "subtitle": "Please fill in the details below to submit your application for the historic journey.",
+        "label-id": "Applicant ID*",
+        "label-first-name": "First Name*",
+        "label-last-name": "Last Name*",
+        "label-email": "Email*",
+        "label-phone": "Contact Number*",
+        "label-dob": "Date of Birth (Age 18-50)*",
+        "label-exp": "Archaeology Experience",
+        "opt-none": "No experience",
+        "opt-amateur": "Amateur (up to 1 year)",
+        "opt-inter": "Intermediate (1–5 years)",
+        "opt-prof": "Professional (more than 5 years)",
+        "label-roles": "Preferred Role in the Expedition",
+        "role-researcher": "Researcher",
+        "role-photographer": "Photographer",
+        "role-drone": "Drone Operator",
+        "role-cartographer": "Cartographer",
+        "role-medic": "Medic",
+        "role-logistician": "Logistician",
+        "label-region": "Preferred Expedition Region*",
+        "region-sa": "South America",
+        "region-af": "Africa",
+        "region-as": "Asia",
+        "region-eu": "Europe",
+        "region-au": "Australia",
+        "label-salary": "Select your desired salary per week ($): ",
+        "label-method": "Preferred Contact Method",
+        "method-email": "Email",
+        "method-phone": "Phone",
+        "method-wa": "WhatsApp",
+        "method-tg": "Telegram",
+        "label-passport": "Upload Passport/ID* (JPG, PNG, PDF)",
+        "label-comments": "Additional Comments (Optional)",
+        "label-terms": "I Agree to the",
+        "label-terms-link": "Terms and Conditions*",
+        "btn-submit": "Submit Registration",
+        "btn-reset": "Clear Form",
+        "mark-900": "No exp (Max $900)",
+        "mark-1125": "1 yr exp (Max $1125)",
+        "mark-1550": "1-5 yrs exp (Max $1550)",
+        "placeholder-id": "e.g., 66010123456",
+        "placeholder-first-name": "e.g., Peter",
+        "placeholder-last-name": "e.g., Ford",
+        "placeholder-email": "e.g., test@email.com",
+        "placeholder-phone": "e.g., 63-416-9816",
+        "placeholder-comments": "Additional notes or inquiries...",
+        "readiness-title": "Readiness",
+        // Checklist Labels EN
+        "chk-id": "Applicant ID (11 digits)",
+        "chk-fname": "First Name (5+ letters)",
+        "chk-lname": "Last Name (5+ letters)",
+        "chk-email": "Valid Email",
+        "chk-phone": "Phone (XX-XXX-XXXX)",
+        "chk-dob": "Age 18-50 Years",
+        "chk-role": "Expedition Role",
+        "chk-region": "Expedition Region",
+        "chk-salary": "Salary Within Limit",
+        "chk-passport": "Passport / ID Uploaded",
+        "chk-terms": "Terms & Conditions Agreed",
+        // Terms Modal EN
+        "terms-modal-title": "📜 Eldoria Expedition Terms & Conditions",
+        "terms-sec1-title": "1. Eligibility & Age Restrictions",
+        "terms-sec1-text": "Applicants must be between 18 and 50 years of age at the time of application. All candidates must possess valid identification or passport and demonstrate physical fitness required for strenuous remote excavation.",
+        "terms-sec2-title": "2. Operational Safety & Field Conduct",
+        "terms-sec2-text": "Members agree to abide by all expedition safety protocols, environmental protection directives, and chain of command orders. High-altitude and wilderness navigation require strict adherence to team guidance.",
+        "terms-sec3-title": "3. Archaeological Heritage & Discoveries",
+        "terms-sec3-text": "All antiquities, manuscripts, geological specimens, and architectural findings remain the absolute property of the Expedition Heritage Trust. Unauthorized collection or concealment of relics is strictly prohibited.",
+        "terms-sec4-title": "4. Compensation & Salary Tiers",
+        "terms-sec4-text": "Weekly disbursements are calculated according to proven archaeological experience verified by credentials. The base expedition stipend ranges from $700 up to $2,250 per week based on designated skill levels.",
+        "terms-sec5-title": "5. Confidentiality & Non-Disclosure",
+        "terms-sec5-text": "Expedition coordinates, site maps, and archaeological records are confidential until official scholarly publication. Participants must not disclose sensitive coordinates to external parties.",
+        "terms-btn-accept": "Accept & Agree",
+        "terms-btn-close": "Close",
+        // Success Modal EN
+        "success-title": "🎉 Registration Submitted!",
+        "success-message": "Your application for the Eldoria Expedition has been verified and registered successfully. We will contact you via your preferred communication method soon.",
+        "success-btn": "Done"
+    },
+    th: {
+        "title": "ลงทะเบียนเข้าร่วมทีมสำรวจเพื่อค้นหาเอลโดเรีย",
+        "subtitle": "โปรดกรอกรายละเอียดด้านล่างเพื่อยื่นใบสมัครสำหรับการเดินทางประวัติศาสตร์",
+        "label-id": "รหัสผู้สมัคร*",
+        "label-first-name": "ชื่อ*",
+        "label-last-name": "นามสกุล*",
+        "label-email": "อีเมล*",
+        "label-phone": "เบอร์โทรศัพท์ติดต่อ*",
+        "label-dob": "วันเกิด (อายุ 18-50 ปี)*",
+        "label-exp": "ประสบการณ์ทางโบราณคดี",
+        "opt-none": "ไม่มีประสบการณ์",
+        "opt-amateur": "ระดับฝึกหัด (ไม่เกิน 1 ปี)",
+        "opt-inter": "ระดับกลาง (1–5 ปี)",
+        "opt-prof": "ระดับมืออาชีพ (มากกว่า 5 ปี)",
+        "label-roles": "บทบาทที่ต้องการในการสำรวจ",
+        "role-researcher": "นักวิจัย",
+        "role-photographer": "ช่างภาพ",
+        "role-drone": "ผู้ควบคุมโดรน",
+        "role-cartographer": "คนทำแผนที่",
+        "role-medic": "หน่วยแพทย์",
+        "role-logistician": "ผู้ดูแลการขนส่ง",
+        "label-region": "ภูมิภาคที่ต้องการไปสำรวจ*",
+        "region-sa": "อเมริกาใต้",
+        "region-af": "แอฟริกา",
+        "region-as": "เอเชีย",
+        "region-eu": "ยุโรป",
+        "region-au": "ออสเตรเลีย",
+        "label-salary": "เลือกเงินเดือนต่อสัปดาห์ที่ต้องการ ($): ",
+        "label-method": "ช่องทางการติดต่อที่สะดวก",
+        "method-email": "อีเมล",
+        "method-phone": "โทรศัพท์",
+        "method-wa": "WhatsApp",
+        "method-tg": "Telegram",
+        "label-passport": "อัปโหลดพาสปอร์ต/บัตรประชาชน* (JPG, PNG, PDF)",
+        "label-comments": "ความคิดเห็นเพิ่มเติม (ไม่บังคับ)",
+        "label-terms": "ฉันยอมรับ",
+        "label-terms-link": "ข้อตกลงและเงื่อนไข*",
+        "btn-submit": "ส่งใบสมัคร",
+        "btn-reset": "ล้างข้อมูล",
+        "mark-900": "ไม่มี ปสก. (สูงสุด $900)",
+        "mark-1125": "ปสก. 1 ปี (สูงสุด $1125)",
+        "mark-1550": "ปสก. 1-5 ปี (สูงสุด $1550)",
+        "placeholder-id": "เช่น 66010123456",
+        "placeholder-first-name": "เช่น สมชาย",
+        "placeholder-last-name": "เช่น ใจดี",
+        "placeholder-email": "เช่น test@email.com",
+        "placeholder-phone": "เช่น 63-416-9816",
+        "placeholder-comments": "ข้อความหรือข้อสงสัยเพิ่มเติม...",
+        "readiness-title": "ความพร้อมส่งงาน",
+        // Checklist Labels TH
+        "chk-id": "รหัสนักศึกษา (11 หลัก)",
+        "chk-fname": "ชื่อ (5 ตัวขึ้นไป)",
+        "chk-lname": "นามสกุล (5 ตัวขึ้นไป)",
+        "chk-email": "อีเมลถูกต้อง",
+        "chk-phone": "เบอร์โทรศัพท์ (63-XXX-XXXX)",
+        "chk-dob": "อายุ 18-50 ปี",
+        "chk-role": "บทบาทหน้าที่",
+        "chk-region": "ภูมิภาคสำรวจ",
+        "chk-salary": "เงินเดือนตามเกณฑ์",
+        "chk-passport": "อัปโหลดพาสปอร์ต/บัตรประชาชน",
+        "chk-terms": "ยอมรับเงื่อนไข",
+        // Terms Modal TH
+        "terms-modal-title": "📜 ข้อตกลงและเงื่อนไขการเดินทางสำรวจเอลโดเรีย",
+        "terms-sec1-title": "1. คุณสมบัติและเกณฑ์อายุผู้สมัคร",
+        "terms-sec1-text": "ผู้สมัครต้องมีอายุระหว่าง 18 ถึง 50 ปีบริบูรณ์ ณ วันที่ยื่นใบสมัคร และต้องมีเอกสารประจำตัวหรือพาสปอร์ตที่ถูกต้อง พร้อมทั้งมีสุขภาพร่างกายและจิตใจที่แข็งแรงสมบูรณ์พร้อมสำหรับการสำรวจในพื้นที่ห่างไกล",
+        "terms-sec2-title": "2. ความปลอดภัยและการปฏิบัติตนในภาคสนาม",
+        "terms-sec2-text": "สมาชิกทุกคนยินยอมปฏิบัติตามกฎระเบียบด้านความปลอดภัย คำสั่งของผู้นำคณะสำรวจ และมาตรการอนุรักษ์สิ่งแวดล้อมอย่างเคร่งครัดเพื่อความปลอดภัยสูงสุดของทีม",
+        "terms-sec3-title": "3. การอนุรักษ์โบราณวัตถุและมรดกทางประวัติศาสตร์",
+        "terms-sec3-text": "โบราณวัตถุ เอกสารจารึก วัตถุทางธรณีวิทยา หรือสิ่งค้นพบใด ๆ ถือเป็นกรรมสิทธิ์โดยสมบูรณ์ของคณะสำรวจ ห้ามมิให้ผู้ใดลักลอบเก็บรักษาหรือนำออกไปโดยไม่ได้รับอนุญาต",
+        "terms-sec4-title": "4. ค่าตอบแทนและสิทธิประโยชน์",
+        "terms-sec4-text": "ค่าจ้างต่อสัปดาห์จะจ่ายตามอัตราประสบการณ์ทางโบราณคดีที่ได้รับอนุมัติ โดยมีอัตราเริ่มต้นตั้งแต่ $700 สูงสุดไม่เกิน $2,250 ต่อสัปดาห์ตามระดับความสามารถ",
+        "terms-sec5-title": "5. การรักษาความลับข้อมูลการสำรวจ",
+        "terms-sec5-text": "พิกัดที่ตั้ง แผนที่ และบันทึกทางโบราณคดีทั้งหมดถือเป็นความลับสูงสุดของคณะสำรวจจนกว่าจะมีการเผยแพร่อย่างเป็นทางการ ห้ามเปิดเผยข้อมูลสำคัญต่อบุคคลภายนอก",
+        "terms-btn-accept": "ยอมรับข้อตกลง",
+        "terms-btn-close": "ปิด",
+        // Success Modal TH
+        "success-title": "🎉 ส่งใบสมัครเรียบร้อยแล้ว!",
+        "success-message": "ข้อมูลการสมัครเข้าร่วมการสำรวจเอลโดเรียของคุณได้รับการตรวจสอบและบันทึกเข้าระบบเรียบร้อยแล้ว เราจะติดต่อกลับผ่านช่องทางที่คุณเลือกไว้ในเร็ว ๆ นี้",
+        "success-btn": "ตกลง"
+    }
+};
+
+let currentLanguage = 'en';
+
+// Helper: Calculate Age from YYYY-MM-DD
+function calculateAge(birthDateStr) {
+    if (!birthDateStr) return -1;
+    const dob = new Date(birthDateStr);
+    if (isNaN(dob.getTime())) return -1;
+    const today = new Date();
+    let age = today.getFullYear() - dob.getFullYear();
+    const m = today.getMonth() - dob.getMonth();
+    if (m < 0 || (m === 0 && today.getDate() < dob.getDate())) {
+        age--;
+    }
+    return age;
+}
+
+// Helper: Phone Number Formatter
+// Strips leading 0 (e.g. 063 416 9816 -> 63-416-9816) and formats as XX-XXX-XXXX
+function formatPhoneNumber(val) {
+    if (!val) return '';
+    let nums = val.replace(/\D/g, '');
+    if (nums.startsWith('0')) {
+        nums = nums.substring(1);
+    }
+    nums = nums.substring(0, 9); // exactly 9 digits after dropping leading 0
+    let formatted = '';
+    if (nums.length > 0) {
+        formatted = nums.substring(0, 2);
+    }
+    if (nums.length > 2) {
+        formatted += '-' + nums.substring(2, 5);
+    }
+    if (nums.length > 5) {
+        formatted += '-' + nums.substring(5, 9);
+    }
+    return formatted;
+}
+
+// Dynamic Salary Limit Hint Update Function
+window.updateSalaryHint = function() {
+    const experienceSelect = document.getElementById('experience');
+    const hintDiv = document.getElementById('salaryLimitHint');
+    if (!experienceSelect || !hintDiv) return;
+
+    const val = experienceSelect.value;
+    let hintText = "";
+
+    if (val === 'none') {
+        hintText = currentLanguage === 'th' ? "* จำกัดเงินเดือนสูงสุดไม่เกิน $900" : "* Maximum allowed salary is $900";
+    } else if (val === 'amateur') {
+        hintText = currentLanguage === 'th' ? "* ประสบการณ์ไม่เกิน 1 ปี: จำกัดเงินเดือนสูงสุดไม่เกิน $1,125" : "* Amateur (up to 1 year): Maximum allowed salary is $1,125";
+    } else if (val === 'intermediate') {
+        hintText = currentLanguage === 'th' ? "* ประสบการณ์ 1-5 ปี: จำกัดเงินเดือนสูงสุดไม่เกิน $1,550" : "* Intermediate (1-5 years): Maximum allowed salary is $1,550";
+    } else if (val === 'professional') {
+        hintText = currentLanguage === 'th' ? "* ประสบการณ์มากกว่า 5 ปี: ยื่นเงินเดือนตามความประสงค์ได้อิสระ (ไม่เกิน $2,250)" : "* Professional: Any salary is allowed (up to $2,250)";
+    }
+
+    hintDiv.textContent = hintText;
+};
+
+// Set language function
+window.setLanguage = function(lang) {
+    if (!i18n[lang]) return;
+    currentLanguage = lang;
+    
+    // Toggle active classes on buttons
+    const btnEn = document.getElementById('btn-en');
+    const btnTh = document.getElementById('btn-th');
+    if (btnEn) btnEn.classList.toggle('active', lang === 'en');
+    if (btnTh) btnTh.classList.toggle('active', lang === 'th');
+    
+    // Update all elements with data-i18n
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+        const key = el.getAttribute('data-i18n');
+        const text = i18n[lang][key];
+        if (text) {
+            if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') {
+                el.placeholder = text;
+            } else {
+                el.textContent = text;
+            }
+        }
+    });
+
+    // Update placeholders
+    const applicantId = document.getElementById('applicantId');
+    const firstName = document.getElementById('firstName');
+    const lastName = document.getElementById('lastName');
+    const email = document.getElementById('email');
+    const contactNumber = document.getElementById('contactNumber');
+    const comments = document.getElementById('comments');
+    
+    if (applicantId) applicantId.placeholder = i18n[lang]["placeholder-id"];
+    if (firstName) firstName.placeholder = i18n[lang]["placeholder-first-name"];
+    if (lastName) lastName.placeholder = i18n[lang]["placeholder-last-name"];
+    if (email) email.placeholder = i18n[lang]["placeholder-email"];
+    if (contactNumber) contactNumber.placeholder = i18n[lang]["placeholder-phone"];
+    if (comments) comments.placeholder = i18n[lang]["placeholder-comments"];
+
+    // Update dynamic salary hint
+    window.updateSalaryHint();
+
+    // Refresh readiness checklist in new language
+    if (window.updateReadinessChecklist) {
+        window.updateReadinessChecklist();
+    }
+};
+
+// Toggle Readiness Checklist Collapse
+window.toggleReadinessCollapse = function() {
+    const widget = document.getElementById('readinessWidget');
+    if (widget) {
+        widget.classList.toggle('collapsed');
+    }
+};
+
+// ==========================================
+// Readiness Checklist Definition & Evaluator
+// ==========================================
+const checklistDefinitions = [
+    {
+        id: 'chk-id',
+        fieldId: 'applicantId',
+        validate: () => {
+            const val = (document.getElementById('applicantId')?.value || '').trim();
+            return /^[0-9]{11}$/.test(val); // Exactly 11 digits
+        }
+    },
+    {
+        id: 'chk-fname',
+        fieldId: 'firstName',
+        validate: () => {
+            const val = (document.getElementById('firstName')?.value || '').trim();
+            return /^[a-zA-Z\u0E00-\u0E7F]{5,}$/.test(val);
+        }
+    },
+    {
+        id: 'chk-lname',
+        fieldId: 'lastName',
+        validate: () => {
+            const val = (document.getElementById('lastName')?.value || '').trim();
+            return /^[a-zA-Z\u0E00-\u0E7F]{5,}$/.test(val);
+        }
+    },
+    {
+        id: 'chk-email',
+        fieldId: 'email',
+        validate: () => {
+            const val = (document.getElementById('email')?.value || '').trim();
+            return /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(val);
+        }
+    },
+    {
+        id: 'chk-phone',
+        fieldId: 'contactNumber',
+        validate: () => {
+            const val = (document.getElementById('contactNumber')?.value || '').trim();
+            return /^\d{2}-\d{3}-\d{4}$/.test(val); // XX-XXX-XXXX format
+        }
+    },
+    {
+        id: 'chk-dob',
+        fieldId: 'dob',
+        validate: () => {
+            const val = document.getElementById('dob')?.value;
+            const age = calculateAge(val);
+            return age >= 18 && age <= 50; // Age 18-50 only
+        }
+    },
+    {
+        id: 'chk-role',
+        fieldId: 'photographer',
+        validate: () => {
+            return document.querySelectorAll('input[name="role"]:checked').length > 0;
+        }
+    },
+    {
+        id: 'chk-region',
+        fieldId: 'southAmerica',
+        validate: () => {
+            return document.querySelector('input[name="region"]:checked') !== null;
+        }
+    },
+    {
+        id: 'chk-salary',
+        fieldId: 'custom-slider-track',
+        validate: () => {
+            const exp = document.getElementById('experience')?.value || 'none';
+            const salary = parseInt(document.getElementById('range')?.value || '700', 10);
+            if (exp === 'none' && salary > 900) return false;
+            if (exp === 'amateur' && salary > 1125) return false;
+            if (exp === 'intermediate' && salary > 1550) return false;
+            return true;
+        }
+    },
+    {
+        id: 'chk-passport',
+        fieldId: 'passport',
+        validate: () => {
+            const input = document.getElementById('passport');
+            return input && input.files && input.files.length > 0;
+        }
+    },
+    {
+        id: 'chk-terms',
+        fieldId: 'terms',
+        validate: () => {
+            return document.getElementById('terms')?.checked === true;
+        }
+    }
+];
+
+window.updateReadinessChecklist = function() {
+    const listContainer = document.getElementById('readinessItemsList');
+    if (!listContainer) return;
+
+    let completedCount = 0;
+    const totalCount = checklistDefinitions.length;
+
+    listContainer.innerHTML = '';
+
+    checklistDefinitions.forEach(item => {
+        const isDone = item.validate();
+        if (isDone) completedCount++;
+
+        const labelText = (i18n[currentLanguage] && i18n[currentLanguage][item.id]) 
+            ? i18n[currentLanguage][item.id] 
+            : item.id;
+
+        const row = document.createElement('div');
+        row.className = `readiness-item ${isDone ? 'done' : ''}`;
+        row.innerHTML = `
+            <span class="item-label">${labelText}</span>
+            <span class="item-status-icon">${isDone ? '✓' : '○'}</span>
+        `;
+
+        row.addEventListener('click', () => {
+            const target = document.getElementById(item.fieldId);
+            if (target) {
+                target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                if (typeof target.focus === 'function') target.focus();
+            }
+        });
+
+        listContainer.appendChild(row);
+    });
+
+    const percentage = Math.round((completedCount / totalCount) * 100);
+    const percentEl = document.getElementById('readinessPercent');
+    const fillEl = document.getElementById('readinessProgressFill');
+
+    if (percentEl) {
+        percentEl.textContent = `${percentage}%`;
+        percentEl.classList.toggle('complete', percentage === 100);
+    }
+
+    if (fillEl) {
+        fillEl.style.width = `${percentage}%`;
+        fillEl.classList.toggle('complete', percentage === 100);
+    }
+};
+
+// ==========================================
+// Initialization on DOMContentLoaded
+// ==========================================
+document.addEventListener("DOMContentLoaded", () => {
+    const form = document.getElementById("expeditionForm");
+    const applicantId = document.getElementById("applicantId");
+    const firstName = document.getElementById("firstName");
+    const lastName = document.getElementById("lastName");
+    const email = document.getElementById("email");
+    const contactNumber = document.getElementById("contactNumber");
+    const dob = document.getElementById("dob");
+    const passport = document.getElementById("passport");
+    const comments = document.getElementById("comments");
+    const terms = document.getElementById("terms");
+
+    // 1. Initialize Date of Birth Limits (Age 18 to 50)
+    const today = new Date();
+    const maxDate = new Date(today.getFullYear() - 18, today.getMonth(), today.getDate()).toISOString().split('T')[0];
+    const minDate = new Date(today.getFullYear() - 50, today.getMonth(), today.getDate()).toISOString().split('T')[0];
+    if (dob) {
+        dob.max = maxDate;
+        dob.min = minDate;
+    }
+
+    // 2. Format Contact Number automatically
+    if (contactNumber) {
+        contactNumber.addEventListener('input', function() {
+            this.value = formatPhoneNumber(this.value);
+            window.updateReadinessChecklist();
+        });
+        contactNumber.addEventListener('blur', function() {
+            this.value = formatPhoneNumber(this.value);
+            window.updateReadinessChecklist();
+        });
+    }
+
+    // 3. Format Applicant ID (Digits only, max 11)
+    if (applicantId) {
+        applicantId.addEventListener('input', function() {
+            this.value = this.value.replace(/\D/g, '').slice(0, 11);
+            window.updateReadinessChecklist();
+        });
+    }
+
+    // 4. Auto-Expanding Comments (Non-manually resizable)
+    if (comments) {
+        comments.addEventListener('input', function() {
+            this.style.height = 'auto';
+            this.style.height = Math.max(85, this.scrollHeight) + 'px';
+        });
+    }
+
+    // 5. Terms Modal Setup
+    const termsModal = document.getElementById('termsModal');
+    const openTermsLink = document.getElementById('openTermsLink');
+    const closeTermsModal = document.getElementById('closeTermsModal');
+    const dismissTermsModalBtn = document.getElementById('dismissTermsModalBtn');
+    const acceptTermsModalBtn = document.getElementById('acceptTermsModalBtn');
+
+    function openTerms() {
+        if (termsModal) {
+            termsModal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+    }
+    function closeTerms() {
+        if (termsModal) {
+            termsModal.classList.remove('active');
+            document.body.style.overflow = '';
+        }
+    }
+
+    if (openTermsLink) openTermsLink.addEventListener('click', openTerms);
+    if (closeTermsModal) closeTermsModal.addEventListener('click', closeTerms);
+    if (dismissTermsModalBtn) dismissTermsModalBtn.addEventListener('click', closeTerms);
+    if (acceptTermsModalBtn) {
+        acceptTermsModalBtn.addEventListener('click', function() {
+            if (terms) {
+                terms.checked = true;
+                window.updateReadinessChecklist();
+            }
+            closeTerms();
+        });
+    }
+    if (termsModal) {
+        termsModal.addEventListener('click', function(e) {
+            if (e.target === termsModal) closeTerms();
+        });
+    }
+
+    // 6. Success Modal Setup
+    const successModal = document.getElementById('successModal');
+    const closeSuccessModal = document.getElementById('closeSuccessModal');
+    const dismissSuccessBtn = document.getElementById('dismissSuccessBtn');
+    function closeSuccess() {
+        if (successModal) {
+            successModal.classList.remove('active');
+            document.body.style.overflow = '';
+        }
+    }
+    if (closeSuccessModal) closeSuccessModal.addEventListener('click', closeSuccess);
+    if (dismissSuccessBtn) dismissSuccessBtn.addEventListener('click', closeSuccess);
+    if (successModal) {
+        successModal.addEventListener('click', function(e) {
+            if (e.target === successModal) closeSuccess();
+        });
+    }
+
+    // 7. Custom Interactive Purple & Gold Slider
+    const minSalary = 700;
+    const maxSalary = 2250;
+    const salaryRangeHidden = document.getElementById('range');
+    const rangeValueDisplay = document.getElementById('rangeValue');
+    const sliderTrack = document.getElementById('custom-slider-track');
+    const sliderFill = document.getElementById('custom-slider-fill');
+    const sliderThumb = document.getElementById('custom-slider-thumb');
+
+    function updateSliderVisuals(salary) {
+        const clamped = Math.max(minSalary, Math.min(maxSalary, salary));
+        const percent = ((clamped - minSalary) / (maxSalary - minSalary)) * 100;
+        
+        if (salaryRangeHidden) salaryRangeHidden.value = clamped;
+        if (rangeValueDisplay) rangeValueDisplay.textContent = clamped;
+        if (sliderFill) sliderFill.style.width = percent + '%';
+        if (sliderThumb) sliderThumb.style.left = percent + '%';
+        
+        window.updateReadinessChecklist();
+    }
+
+    window.setCustomSliderValue = updateSliderVisuals;
+
+    if (sliderTrack) {
+        let isDragging = false;
+        function getSalaryFromEvent(e) {
+            const rect = sliderTrack.getBoundingClientRect();
+            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+            let percent = (clientX - rect.left) / rect.width;
+            percent = Math.max(0, Math.min(1, percent));
+            return Math.round(minSalary + percent * (maxSalary - minSalary));
+        }
+
+        sliderTrack.addEventListener('mousedown', (e) => {
+            isDragging = true;
+            updateSliderVisuals(getSalaryFromEvent(e));
+        });
+        window.addEventListener('mousemove', (e) => {
+            if (isDragging) {
+                updateSliderVisuals(getSalaryFromEvent(e));
+            }
+        });
+        window.addEventListener('mouseup', () => {
+            isDragging = false;
+        });
+
+        sliderTrack.addEventListener('touchstart', (e) => {
+            isDragging = true;
+            updateSliderVisuals(getSalaryFromEvent(e));
+        }, { passive: true });
+        window.addEventListener('touchmove', (e) => {
+            if (isDragging) {
+                updateSliderVisuals(getSalaryFromEvent(e));
+            }
+        }, { passive: true });
+        window.addEventListener('touchend', () => {
+            isDragging = false;
+        });
+    }
+
+    // Initial slider position
+    updateSliderVisuals(700);
+
+    // 8. Event listeners for real-time readiness updates
+    if (form) {
+        form.addEventListener('input', window.updateReadinessChecklist);
+        form.addEventListener('change', window.updateReadinessChecklist);
+        form.addEventListener('reset', () => {
+            setTimeout(() => {
+                updateSliderVisuals(700);
+                if (comments) comments.style.height = '85px';
+                window.updateReadinessChecklist();
+            }, 50);
+        });
+    }
+
+    // 9. Form Submission Handler with Full Validations
+    if (form) {
+        form.addEventListener("submit", function(event) {
+            event.preventDefault();
+
+            // A. Applicant ID: Exactly 11 digits
+            const idVal = (applicantId?.value || '').trim();
+            if (!/^[0-9]{11}$/.test(idVal)) {
+                alert(currentLanguage === 'th' 
+                    ? "โปรดใส่ตัวเลขรหัสนักศึกษา 11 ตัวเท่านั้น (ไม่เกินและไม่ขาด)" 
+                    : "Please enter an 11-digit Applicant ID (numbers only).");
+                applicantId.focus();
+                return;
+            }
+
+            // B. First Name & Last Name (>= 5 letters, no numbers/special symbols)
+            const namePattern = /^[a-zA-Z\u0E00-\u0E7F]{5,}$/;
+            const fNameVal = (firstName?.value || '').trim();
+            const lNameVal = (lastName?.value || '').trim();
+
+            if (!namePattern.test(fNameVal)) {
+                alert(currentLanguage === 'th' 
+                    ? "ชื่อต้องประกอบด้วยตัวอักษรอย่างน้อย 5 ตัวขึ้นไป และห้ามมีตัวเลขหรืออักขระพิเศษ" 
+                    : "First Name must contain at least 5 letters and cannot have numbers or special characters.");
+                firstName.focus();
+                return;
+            }
+
+            if (!namePattern.test(lNameVal)) {
+                alert(currentLanguage === 'th' 
+                    ? "นามสกุลต้องประกอบด้วยตัวอักษรอย่างน้อย 5 ตัวขึ้นไป และห้ามมีตัวเลขหรืออักขระพิเศษ" 
+                    : "Last Name must contain at least 5 letters and cannot have numbers or special characters.");
+                lastName.focus();
+                return;
+            }
+
+            // C. Email
+            const emailVal = (email?.value || '').trim();
+            const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+            if (!emailPattern.test(emailVal)) {
+                alert(currentLanguage === 'th' 
+                    ? "โปรดใส่อีเมลในรูปแบบที่ถูกต้อง เช่น test@email.com" 
+                    : "Please enter a valid email address (e.g., test@email.com).");
+                email.focus();
+                return;
+            }
+
+            // D. Phone Number: XX-XXX-XXXX format
+            const phoneVal = (contactNumber?.value || '').trim();
+            if (!/^\d{2}-\d{3}-\d{4}$/.test(phoneVal)) {
+                alert(currentLanguage === 'th' 
+                    ? "โปรดใส่เบอร์โทรศัพท์ในรูปแบบที่ถูกต้อง (เช่น 63-416-9816)" 
+                    : "Please enter a valid phone number (e.g., 63-416-9816).");
+                contactNumber.focus();
+                return;
+            }
+
+            // E. Date of Birth: 18 to 50 years old
+            const age = calculateAge(dob?.value);
+            if (age < 18 || age > 50) {
+                alert(currentLanguage === 'th' 
+                    ? "ผู้สมัครต้องมีอายุระหว่าง 18 ถึง 50 ปีเท่านั้นในการลงทะเบียน" 
+                    : "Applicant must be between 18 and 50 years old to register.");
+                dob.focus();
+                return;
+            }
+
+            // F. Role: At least one selected
+            const selectedRoles = document.querySelectorAll('input[name="role"]:checked');
+            if (selectedRoles.length === 0) {
+                alert(currentLanguage === 'th' 
+                    ? "โปรดเลือกบทบาทที่ต้องการในการสำรวจอย่างน้อย 1 ตำแหน่ง" 
+                    : "Please select at least one role in the expedition.");
+                return;
+            }
+
+            // G. Region: One selected
+            const selectedRegion = document.querySelector('input[name="region"]:checked');
+            if (!selectedRegion) {
+                alert(currentLanguage === 'th' 
+                    ? "โปรดเลือกภูมิภาคที่ต้องการไปสำรวจ" 
+                    : "Please select your preferred expedition region.");
+                return;
+            }
+
+            // H. Salary limits per experience
+            const exp = document.getElementById('experience')?.value || 'none';
+            const salary = parseInt(document.getElementById('range')?.value || '700', 10);
+            if (exp === 'none' && salary > 900) {
+                alert(currentLanguage === 'th' 
+                    ? "ผู้ที่ไม่มีประสบการณ์ สามารถเลือกเงินเดือนได้สูงสุดไม่เกิน $900 ต่อสัปดาห์" 
+                    : "No experience: Desired salary cannot exceed $900 per week.");
+                return;
+            }
+            if (exp === 'amateur' && salary > 1125) {
+                alert(currentLanguage === 'th' 
+                    ? "ผู้มีประสบการณ์ไม่เกิน 1 ปี สามารถเลือกเงินเดือนได้สูงสุดไม่เกิน $1,125 ต่อสัปดาห์" 
+                    : "Amateur experience: Desired salary cannot exceed $1,125 per week.");
+                return;
+            }
+            if (exp === 'intermediate' && salary > 1550) {
+                alert(currentLanguage === 'th' 
+                    ? "ผู้มีประสบการณ์ 1-5 ปี สามารถเลือกเงินเดือนได้สูงสุดไม่เกิน $1,550 ต่อสัปดาห์" 
+                    : "Intermediate experience: Desired salary cannot exceed $1,550 per week.");
+                return;
+            }
+
+            // I. Passport File Upload
+            if (!passport || !passport.files || passport.files.length === 0) {
+                alert(currentLanguage === 'th' 
+                    ? "กรุณาอัปโหลดเอกสารพาสปอร์ตหรือบัตรประชาชน (ไฟล์ JPG, PNG หรือ PDF)" 
+                    : "Please upload your Passport or ID document (JPG, PNG, PDF).");
+                passport.focus();
+                return;
+            }
+
+            // J. Terms and Conditions
+            if (!terms || !terms.checked) {
+                alert(currentLanguage === 'th' 
+                    ? "กรุณาอ่านและยอมรับข้อตกลงและเงื่อนไขการเดินทางก่อนส่งใบสมัคร" 
+                    : "Please agree to the Terms and Conditions before submitting.");
+                terms.focus();
+                return;
+            }
+
+            // Success! Display Modal Confirmation
+            if (successModal) {
+                successModal.classList.add('active');
+                document.body.style.overflow = 'hidden';
+            } else {
+                alert(currentLanguage === 'th' 
+                    ? "ส่งใบสมัครสำเร็จ! ข้อมูลของคุณได้รับการบันทึกเรียบร้อยแล้ว" 
+                    : "Registration Submitted! Welcome to the Eldoria Expedition.");
+            }
+        });
+    }
+
+    // Initial language setup & readiness calculation
+    window.setLanguage('en');
+    window.updateReadinessChecklist();
+});

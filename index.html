@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Expedition Registration Form | Gold & Purple Magical Edition</title>
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+    
+    <!-- Stylesheet with Cache Buster (?v=3) -->
+    <link rel="stylesheet" href="./Form Testing Exercise_ Find Validation Bugs _ Realbugz QA Practice_files/main.css?v=200">
+</head>
+<body>
+    <!-- Floating Magical Orbs for animated background -->
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
+
+    <!-- Floating Top-Right Side Panel: Language Switcher and Readiness Checklist -->
+    <div class="floating-side-panel">
+        <!-- 1. Language Switcher -->
+        <div class="lang-switch-container">
+            <button type="button" class="lang-btn active" id="btn-en" onclick="setLanguage('en')">EN</button>
+            <button type="button" class="lang-btn" id="btn-th" onclick="setLanguage('th')">TH</button>
+        </div>
+
+        <!-- 2. Submission Readiness Checklist (Concise topic headers) -->
+        <div class="readiness-widget" id="readinessWidget">
+            <div class="readiness-header" onclick="toggleReadinessCollapse()">
+                <div class="readiness-title-row">
+                    <span class="readiness-icon">📋</span>
+                    <span class="readiness-title" data-i18n="readiness-title">Readiness</span>
+                </div>
+                <div class="readiness-status-group">
+                    <span class="readiness-percentage" id="readinessPercent">0%</span>
+                    <button type="button" class="readiness-toggle-btn" id="readinessToggleBtn" title="Toggle checklist">▼</button>
+                </div>
+            </div>
+            
+            <!-- Progress Bar -->
+            <div class="readiness-progress-bar">
+                <div class="readiness-progress-fill" id="readinessProgressFill" style="width: 0%;"></div>
+            </div>
+
+            <!-- Collapsible Checklist with Concise Topics -->
+            <div class="readiness-checklist" id="readinessChecklist">
+                <div class="readiness-items-list" id="readinessItemsList">
+                    <!-- Dynamically populated via JS -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Floating / Sticky Header with ELDORIA EXPEDITION Title -->
+    <header id="mainHeader">
+        <div class="header-container">
+            <div class="logo-text">ELDORIA EXPEDITION</div>
+        </div>
+    </header>
+
+    <main>
+        <!-- Animated Glowing border card wrapper -->
+        <div class="card-glow-wrapper">
+            <div class="form-card">
+                <h1 data-i18n="title">Register for the Expedition in search of Eldoria</h1>
+                <p class="subtitle" data-i18n="subtitle">Please fill in the details below to submit your application for the historic journey.</p>
+                
+                <form id="expeditionForm" enctype="multipart/form-data">
+                    
+                    <!-- Applicant ID -->
+                    <div class="form-group">
+                        <label for="applicantId" data-i18n="label-id">Applicant ID*</label>
+                        <input type="text" id="applicantId" name="applicantId" placeholder="e.g., 66010123456" maxlength="11" pattern="[0-9]{11}" required autocomplete="off">
+                    </div>
+
+                    <!-- First Name & Last Name -->
+                    <div class="form-row">
+                        <div class="form-group col-6">
+                            <label for="firstName" data-i18n="label-first-name">First Name*</label>
+                            <input type="text" id="firstName" name="firstName" placeholder="e.g., Peter" required maxlength="50">
+                        </div>
+                        <div class="form-group col-6">
+                            <label for="lastName" data-i18n="label-last-name">Last Name*</label>
+                            <input type="text" id="lastName" name="lastName" placeholder="e.g., Ford" required maxlength="50">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="email" data-i18n="label-email">Email*</label>
+                        <!-- Bug 1: Mismatched Input Type (type="text" instead of "email") -->
+                        <input type="email" id="email" name="email" placeholder="e.g., test@email.com" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="contactNumber" data-i18n="label-phone">Contact Number*</label>
+                        <div class="phone-input-group">
+                            <select id="countryCode" name="countryCode">
+                                <option value="+66">Thailand (+66)</option>
+                                <option value="+1">United States (+1)</option>
+                                <option value="+44">United Kingdom (+44)</option>
+                                <option value="+81">Japan (+81)</option>
+                                <option value="+65">Singapore (+65)</option>
+                                <option value="+61">Australia (+61)</option>
+                                <option value="+82">South Korea (+82)</option>
+                            </select>
+                            <input type="tel" id="contactNumber" name="contactNumber" placeholder="e.g., 63-416-9816" maxlength="11" required autocomplete="tel">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="dob" data-i18n="label-dob">Date of Birth*</label>
+                        <input type="date" id="dob" name="dob" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="experience" data-i18n="label-exp">Archaeology Experience</label>
+                        <select id="experience" name="experience" onchange="updateSalaryHint()">
+                            <option value="none" data-i18n="opt-none">No experience</option>
+                            <option value="amateur" data-i18n="opt-amateur">Amateur (up to 1 year)</option>
+                            <option value="intermediate" data-i18n="opt-inter">Intermediate (1–5 years)</option>
+                            <option value="professional" data-i18n="opt-prof">Professional (more than 5 years)</option>
+                        </select>
+                        <div id="salaryLimitHint" class="salary-limit-hint"></div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="group-title" data-i18n="label-roles">Preferred Role in the Expedition</label>
+                        <div class="options-container">
+                            <div class="checkbox-option">
+                                <input type="checkbox" id="researcher" name="role" value="Researcher">
+                                <label for="researcher" data-i18n="role-researcher">Researcher</label>
+                            </div>
+                            <div class="checkbox-option">
+                                <input type="checkbox" id="photographer" name="role" value="Photographer">
+                                <label for="photographer" data-i18n="role-photographer">Photographer</label>
+                            </div>
+                            <div class="checkbox-option">
+                                <input type="checkbox" id="drone" name="role" value="Drone Operator">
+                                <label for="drone" data-i18n="role-drone">Drone Operator</label>
+                            </div>
+                            <div class="checkbox-option">
+                                <input type="checkbox" id="cartographer" name="role" value="Cartographer">
+                                <label for="cartographer" data-i18n="role-cartographer">Cartographer</label>
+                            </div>
+                            <div class="checkbox-option">
+                                <input type="checkbox" id="medic" name="role" value="Medic">
+                                <label for="medic" data-i18n="role-medic">Medic</label>
+                            </div>
+                            <div class="checkbox-option">
+                                <input type="checkbox" id="logistician" name="role" value="Logistician">
+                                <label for="logistician" data-i18n="role-logistician">Logistician</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="group-title" data-i18n="label-region">Preferred Expedition Region*</label>
+                        <div class="options-container">
+                            <div class="radio-option">
+                                <input type="radio" name="region" id="southAmerica" value="South America" required>
+                                <label for="southAmerica" data-i18n="region-sa">South America</label>
+                            </div>
+                            <div class="radio-option">
+                                <input type="radio" name="region" id="africa" value="Africa">
+                                <label for="africa" data-i18n="region-af">Africa</label>
+                            </div>
+                            <div class="radio-option">
+                                <input type="radio" name="region" id="asia" value="Asia">
+                                <label for="asia" data-i18n="region-as">Asia</label>
+                            </div>
+                            <div class="radio-option">
+                                <input type="radio" name="region" id="europe" value="Europe">
+                                <label for="europe" data-i18n="region-eu">Europe</label>
+                            </div>
+                            <div class="radio-option">
+                                <input type="radio" name="region" id="australia" value="Australia">
+                                <label for="australia" data-i18n="region-au">Australia</label>
+                            </div>
+                            
+                        </div>
+                    </div>
+
+                                        <div class="form-group">
+                        <label for="range"><span data-i18n="label-salary">Select your desired salary per week ($): </span><span id="rangeValue">700</span></label>
+                        <!-- Hidden input so the slider value is submitted with the form -->
+                        <input type="hidden" id="range" name="range" min="700" max="2250" value="700">
+                        
+                        <!-- Custom HTML Slider track, fill, thumb and solid marks -->
+                        <div class="custom-slider-container">
+                            <div class="custom-slider-track" id="custom-slider-track">
+                                <div class="custom-slider-fill" id="custom-slider-fill"></div>
+                                <div class="custom-slider-thumb" id="custom-slider-thumb"></div>
+                                
+                                <div class="slider-marks">
+                                    <!-- Mark 900 -->
+                                    <div class="slider-mark" id="mark-900" style="left: calc((900 - 700) / 1550 * 100%);">
+                                        <div class="mark-circle"></div>
+                                        <div class="mark-label">$900</div>
+                                    </div>
+                                    <!-- Mark 1125 -->
+                                    <div class="slider-mark" id="mark-1125" style="left: calc((1125 - 700) / 1550 * 100%);">
+                                        <div class="mark-circle"></div>
+                                        <div class="mark-label">$1,125</div>
+                                    </div>
+                                    <!-- Mark 1550 -->
+                                    <div class="slider-mark" id="mark-1550" style="left: calc((1550 - 700) / 1550 * 100%);">
+                                        <div class="mark-circle"></div>
+                                        <div class="mark-label">$1,550</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="contactMethod" data-i18n="label-method">Preferred Contact Method</label>
+                        <select id="contactMethod" name="contactMethod">
+                            <option value="Email" data-i18n="method-email">Email</option>
+                            <option value="Phone" data-i18n="method-phone">Phone</option>
+                            <option value="WhatsApp" data-i18n="method-wa">WhatsApp</option>
+                            <option value="Telegram" data-i18n="method-tg">Telegram</option>
+                        </select>
+                        <div id="salaryLimitHint" class="salary-limit-hint"></div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="passport" data-i18n="label-passport">Upload Passport/ID* (JPG, PNG, PDF)</label>
+                        <input type="file" id="passport" name="passport" accept=".jpg, .jpeg, .png, .pdf" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="comments" data-i18n="label-comments">Additional Comments (Optional)</label>
+                        <textarea id="comments" name="comments" rows="3" placeholder="Additional notes or inquiries..." autocomplete="off"></textarea>
+                    </div>
+
+                    <div class="form-group terms-group">
+                        <input type="checkbox" id="terms" required>
+                        <label for="terms">
+                            <span data-i18n="label-terms">I Agree to the</span>
+                            <a href="javascript:void(0)" class="terms-link" id="openTermsLink" data-i18n="label-terms-link">Terms and Conditions*</a>
+                        </label>
+                    </div>
+
+                                        <div class="button-group">
+                        <button type="submit" class="btn-submit" data-i18n="btn-submit">Submit Registration</button>
+                        <button type="reset" class="btn-reset" data-i18n="btn-reset">Clear Form</button>
+                    </div>
+                    
+                </form>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <div class="footer-container">
+            <p>&copy; 2026 Eldoria Expedition. All rights reserved. Premium Animated QA Practice Website.</p>
+        </div>
+    </footer>
+
+    <!-- JavaScript with Cache Buster (?v=3) -->
+    <script src="./Form Testing Exercise_ Find Validation Bugs _ Realbugz QA Practice_files/main.js.download?v=200"></script>
+    
+
+    <!-- Terms and Conditions Modal -->
+    <div id="termsModal" class="modal-backdrop">
+        <div class="modal-dialog">
+            <div class="modal-header">
+                <div class="modal-title-row">
+                    <span class="modal-icon">📜</span>
+                    <h3 data-i18n="terms-modal-title">Eldoria Expedition Terms & Conditions</h3>
+                </div>
+                <button type="button" class="modal-close-btn" id="closeTermsModal" aria-label="Close">&times;</button>
+            </div>
+            <div class="modal-body" id="modalTermsContent">
+                <div class="terms-section">
+                    <h4 data-i18n="terms-sec1-title">1. Eligibility & Age Restrictions</h4>
+                    <p data-i18n="terms-sec1-text">Applicants must be between 18 and 50 years of age at the time of application. All candidates must possess valid identification or passport and demonstrate physical fitness required for strenuous remote excavation.</p>
+                </div>
+                <div class="terms-section">
+                    <h4 data-i18n="terms-sec2-title">2. Operational Safety & Field Conduct</h4>
+                    <p data-i18n="terms-sec2-text">Members agree to abide by all expedition safety protocols, environmental protection directives, and chain of command orders. High-altitude and wilderness navigation require strict adherence to team guidance.</p>
+                </div>
+                <div class="terms-section">
+                    <h4 data-i18n="terms-sec3-title">3. Archaeological Heritage & Discoveries</h4>
+                    <p data-i18n="terms-sec3-text">All antiquities, manuscripts, geological specimens, and architectural findings remain the absolute property of the Expedition Heritage Trust. Unauthorized collection or concealment of relics is strictly prohibited.</p>
+                </div>
+                <div class="terms-section">
+                    <h4 data-i18n="terms-sec4-title">4. Compensation & Salary Tiers</h4>
+                    <p data-i18n="terms-sec4-text">Weekly disbursements are calculated according to proven archaeological experience verified by credentials. The base expedition stipend ranges from $700 up to $2,250 per week based on designated skill levels.</p>
+                </div>
+                <div class="terms-section">
+                    <h4 data-i18n="terms-sec5-title">5. Confidentiality & Non-Disclosure</h4>
+                    <p data-i18n="terms-sec5-text">Expedition coordinates, site maps, and archaeological records are confidential until official scholarly publication. Participants must not disclose sensitive coordinates to external parties.</p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="modal-btn-accept" id="acceptTermsModalBtn" data-i18n="terms-btn-accept">Accept & Agree</button>
+                <button type="button" class="modal-btn-close" id="dismissTermsModalBtn" data-i18n="terms-btn-close">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Success Confirmation Modal -->
+    <div id="successModal" class="modal-backdrop">
+        <div class="modal-dialog success-dialog">
+            <div class="modal-header success-header">
+                <div class="modal-title-row">
+                    <span class="modal-icon">🎉</span>
+                    <h3 data-i18n="success-title">Registration Submitted!</h3>
+                </div>
+                <button type="button" class="modal-close-btn" id="closeSuccessModal">&times;</button>
+            </div>
+            <div class="modal-body success-body">
+                <p data-i18n="success-message">Your application for the Eldoria Expedition has been verified and registered successfully. We will contact you via your preferred communication method soon.</p>
+            </div>
+            <div class="modal-footer success-footer">
+                <button type="button" class="modal-btn-accept" id="dismissSuccessBtn" data-i18n="success-btn">Done</button>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>
