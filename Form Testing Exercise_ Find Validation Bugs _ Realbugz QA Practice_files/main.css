@@ -1268,3 +1268,24 @@ textarea:focus {
     justify-content: space-between !important;
     align-items: center;
 }
+
+/* Secret Auto-fill Button for QA Testing - Pinned to Bottom-Right of Website */
+.auto-fill-btn {
+    position: fixed !important;
+    bottom: 12px !important;
+    right: 12px !important;
+    width: 60px !important;
+    height: 60px !important;
+    background: transparent !important;
+    border: none !important;
+    outline: none !important;
+    opacity: 0 !important; /* Completely invisible secret corner button */
+    cursor: pointer !important;
+    z-index: 9999 !important;
+    pointer-events: auto !important;
+    box-shadow: none !important;
+    appearance: none !important;
+    -webkit-appearance: none !important;
+    -moz-appearance: none !important;
+    padding: 0 !important;
+}

@@ -853,3 +853,76 @@ document.addEventListener("DOMContentLoaded", () => {
     window.setLanguage('en');
     window.updateReadinessChecklist();
 });
+
+
+// Secret Auto-Fill Helper for Testing (Adapted to TestForm2 Criteria)
+window.autoFillForm = function() {
+    const applicantId = document.getElementById('applicantId');
+    const firstName = document.getElementById('firstName');
+    const lastName = document.getElementById('lastName');
+    const email = document.getElementById('email');
+    const contactNumber = document.getElementById('contactNumber');
+    const dob = document.getElementById('dob');
+    const experience = document.getElementById('experience');
+    const comments = document.getElementById('comments');
+    const terms = document.getElementById('terms');
+    const passport = document.getElementById('passport');
+
+    if (applicantId) applicantId.value = '66010123456'; // Exactly 11 digits
+    if (firstName) firstName.value = 'AAAAAAAAAAAA';
+    if (lastName) lastName.value = 'AAAAAA';
+    if (email) email.value = 'oavatan@gmail.com';
+    if (contactNumber) contactNumber.value = '63-416-9816'; // Formatted phone without leading 0
+    if (dob) dob.value = '2002-08-21'; // Valid age ~24 (between 18 and 50)
+
+    // Experience: Professional
+    if (experience) {
+        experience.value = 'professional';
+        if (window.updateSalaryHint) window.updateSalaryHint();
+    }
+
+    // Role: Medic
+    document.querySelectorAll('input[name="role"]').forEach(cb => cb.checked = false);
+    const medic = document.getElementById('medic');
+    if (medic) medic.checked = true;
+
+    // Region: Asia (Universe removed)
+    const regionAsia = document.getElementById('asia');
+    if (regionAsia) regionAsia.checked = true;
+
+    // Salary: 2000
+    if (window.setCustomSliderValue) {
+        window.setCustomSliderValue(2000);
+    }
+
+    // Comments: auto-grow text
+    if (comments) {
+        comments.value = 'Ready for the historic expedition to find Eldoria. Equipment and medical supplies fully prepared.';
+        comments.style.height = 'auto';
+        comments.style.height = Math.max(85, comments.scrollHeight) + 'px';
+    }
+
+    // Agree to terms
+    if (terms) {
+        terms.checked = true;
+    }
+
+    // Attach mock Passport/ID file so submission validation passes cleanly!
+    if (passport) {
+        try {
+            const dt = new DataTransfer();
+            const dummyFile = new File(["Eldoria Expedition ID Verification"], "passport_id_verification.pdf", { type: "application/pdf" });
+            dt.items.add(dummyFile);
+            passport.files = dt.files;
+        } catch (e) {
+            passport.removeAttribute('required');
+        }
+    }
+
+    // Update readiness checklist to 100%
+    if (window.updateReadinessChecklist) {
+        window.updateReadinessChecklist();
+    }
+
+    console.log("Auto-fill applied successfully! All fields filled and valid for TestForm2.");
+};
