@@ -11,7 +11,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
     
     <!-- Stylesheet with Cache Buster (?v=3) -->
-    <link rel="stylesheet" href="./Form Testing Exercise_ Find Validation Bugs _ Realbugz QA Practice_files/main.css?v=200">
+    <link rel="stylesheet" href="./Form Testing Exercise_ Find Validation Bugs _ Realbugz QA Practice_files/main.css?v=201">
 </head>
 <body>
     <!-- Floating Magical Orbs for animated background -->
@@ -261,7 +261,7 @@
     </footer>
 
     <!-- JavaScript with Cache Buster (?v=3) -->
-    <script src="./Form Testing Exercise_ Find Validation Bugs _ Realbugz QA Practice_files/main.js.download?v=200"></script>
+    <script src="./Form Testing Exercise_ Find Validation Bugs _ Realbugz QA Practice_files/main.js.download?v=201"></script>
     
 
     <!-- Terms and Conditions Modal -->
@@ -303,21 +303,33 @@
         </div>
     </div>
 
-    <!-- Success Confirmation Modal -->
+    <!-- Success Confirmation & Applicant Summary Modal -->
     <div id="successModal" class="modal-backdrop">
-        <div class="modal-dialog success-dialog">
-            <div class="modal-header success-header">
+        <div class="modal-dialog summary-dialog">
+            <div class="modal-header summary-header">
                 <div class="modal-title-row">
-                    <span class="modal-icon">🎉</span>
-                    <h3 data-i18n="success-title">Registration Submitted!</h3>
+                    <span class="modal-icon">📜</span>
+                    <h3 data-i18n="summary-modal-title">Expedition Application Summary</h3>
                 </div>
                 <button type="button" class="modal-close-btn" id="closeSuccessModal">&times;</button>
             </div>
-            <div class="modal-body success-body">
-                <p data-i18n="success-message">Your application for the Eldoria Expedition has been verified and registered successfully. We will contact you via your preferred communication method soon.</p>
+            <div class="modal-body summary-body">
+                <div class="summary-status-banner">
+                    <span class="status-icon">✅</span>
+                    <div>
+                        <strong data-i18n="summary-status-title">Registration Successfully Submitted</strong>
+                        <p data-i18n="summary-status-desc">Here is the brief summary of your registered applicant details:</p>
+                    </div>
+                </div>
+
+                <!-- Card containing summary of all applicant information -->
+                <div class="summary-details-card" id="summaryDetailsCard">
+                    <!-- Populated dynamically via JS -->
+                </div>
             </div>
-            <div class="modal-footer success-footer">
-                <button type="button" class="modal-btn-accept" id="dismissSuccessBtn" data-i18n="success-btn">Done</button>
+            <div class="modal-footer summary-footer">
+                <button type="button" class="modal-btn-close" id="printSummaryBtn" onclick="window.print()" data-i18n="summary-btn-print">🖨️ Print / Save</button>
+                <button type="button" class="modal-btn-accept" id="dismissSuccessBtn" data-i18n="summary-btn-done">Done</button>
             </div>
         </div>
     </div>

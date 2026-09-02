@@ -76,10 +76,12 @@ const i18n = {
         "terms-sec5-text": "Expedition coordinates, site maps, and archaeological records are confidential until official scholarly publication. Participants must not disclose sensitive coordinates to external parties.",
         "terms-btn-accept": "Accept & Agree",
         "terms-btn-close": "Close",
-        // Success Modal EN
-        "success-title": "🎉 Registration Submitted!",
-        "success-message": "Your application for the Eldoria Expedition has been verified and registered successfully. We will contact you via your preferred communication method soon.",
-        "success-btn": "Done"
+        // Summary Modal EN
+        "summary-modal-title": "📜 Expedition Application Summary",
+        "summary-status-title": "Registration Successfully Submitted!",
+        "summary-status-desc": "Here is the brief summary of your registered applicant details:",
+        "summary-btn-print": "🖨️ Print / Save",
+        "summary-btn-done": "Done"
     },
     th: {
         "title": "ลงทะเบียนเข้าร่วมทีมสำรวจเพื่อค้นหาเอลโดเรีย",
@@ -156,10 +158,12 @@ const i18n = {
         "terms-sec5-text": "พิกัดที่ตั้ง แผนที่ และบันทึกทางโบราณคดีทั้งหมดถือเป็นความลับสูงสุดของคณะสำรวจจนกว่าจะมีการเผยแพร่อย่างเป็นทางการ ห้ามเปิดเผยข้อมูลสำคัญต่อบุคคลภายนอก",
         "terms-btn-accept": "ยอมรับข้อตกลง",
         "terms-btn-close": "ปิด",
-        // Success Modal TH
-        "success-title": "🎉 ส่งใบสมัครเรียบร้อยแล้ว!",
-        "success-message": "ข้อมูลการสมัครเข้าร่วมการสำรวจเอลโดเรียของคุณได้รับการตรวจสอบและบันทึกเข้าระบบเรียบร้อยแล้ว เราจะติดต่อกลับผ่านช่องทางที่คุณเลือกไว้ในเร็ว ๆ นี้",
-        "success-btn": "ตกลง"
+        // Summary Modal TH
+        "summary-modal-title": "📜 ข้อมูลสรุปใบสมัครผู้เข้าร่วมการสำรวจ",
+        "summary-status-title": "ส่งใบสมัครเข้าร่วมการสำรวจเรียบร้อยแล้ว!",
+        "summary-status-desc": "ข้อมูลผู้สมัครฉบับย่อทั้งหมดของคุณได้รับการตรวจสอบและบันทึกดังนี้:",
+        "summary-btn-print": "🖨️ พิมพ์ / บันทึก",
+        "summary-btn-done": "ตกลง"
     }
 };
 
@@ -734,14 +738,113 @@ document.addEventListener("DOMContentLoaded", () => {
                 return;
             }
 
-            // Success! Display Modal Confirmation
+            // Success! Populate and Display Applicant Summary Modal
+            const summaryCard = document.getElementById('summaryDetailsCard');
+            if (summaryCard) {
+                const lang = currentLanguage;
+                
+                // 1. Applicant ID
+                const idDisplay = idVal;
+                
+                // 2. Full Name
+                const fullNameDisplay = `${fNameVal} ${lNameVal}`;
+                
+                // 3. Email
+                const emailDisplay = emailVal;
+                
+                // 4. Contact Number with Country Code
+                const countryCode = document.getElementById('countryCode')?.value || '+66';
+                const phoneDisplay = `${countryCode} ${phoneVal}`;
+                
+                // 5. Date of Birth & Age
+                const dobVal = dob?.value || '';
+                const dobDisplay = `${dobVal} (${age} ${lang === 'th' ? 'ปี' : 'years old'})`;
+                
+                // 6. Archaeology Experience Label
+                const expSelect = document.getElementById('experience');
+                const expText = expSelect ? expSelect.options[expSelect.selectedIndex].text : exp;
+                
+                // 7. Preferred Role(s)
+                const selectedRoleLabels = Array.from(selectedRoles).map(cb => {
+                    const label = document.querySelector(`label[for="${cb.id}"]`);
+                    return label ? label.textContent.trim() : cb.value;
+                });
+                const rolesDisplay = selectedRoleLabels.join(', ');
+                
+                // 8. Preferred Region
+                const regionLabel = document.querySelector(`label[for="${selectedRegion.id}"]`);
+                const regionDisplay = regionLabel ? regionLabel.textContent.trim() : selectedRegion.value;
+                
+                // 9. Desired Salary
+                const salaryDisplay = `$${salary.toLocaleString()} ${lang === 'th' ? '/ สัปดาห์' : '/ week'}`;
+                
+                // 10. Contact Method
+                const methodSelect = document.getElementById('contactMethod');
+                const methodDisplay = methodSelect ? methodSelect.options[methodSelect.selectedIndex].text : 'Email';
+                
+                // 11. Passport/ID File
+                const passportFileName = passport.files[0] ? passport.files[0].name : 'Uploaded Document';
+                
+                // 12. Additional Comments
+                const commentsVal = comments?.value.trim() || (lang === 'th' ? '(ไม่มีความคิดเห็นเพิ่มเติม)' : '(None)');
+
+                summaryCard.innerHTML = `
+                    <div class="summary-grid">
+                        <div class="summary-item">
+                            <span class="summary-label">🆔 ${lang === 'th' ? 'รหัสผู้สมัคร' : 'Applicant ID'}</span>
+                            <strong class="summary-value">${idDisplay}</strong>
+                        </div>
+                        <div class="summary-item">
+                            <span class="summary-label">👤 ${lang === 'th' ? 'ชื่อ-นามสกุล' : 'Full Name'}</span>
+                            <strong class="summary-value">${fullNameDisplay}</strong>
+                        </div>
+                        <div class="summary-item">
+                            <span class="summary-label">📧 ${lang === 'th' ? 'อีเมล' : 'Email'}</span>
+                            <strong class="summary-value">${emailDisplay}</strong>
+                        </div>
+                        <div class="summary-item">
+                            <span class="summary-label">📱 ${lang === 'th' ? 'เบอร์โทรศัพท์' : 'Phone'}</span>
+                            <strong class="summary-value">${phoneDisplay}</strong>
+                        </div>
+                        <div class="summary-item">
+                            <span class="summary-label">🎂 ${lang === 'th' ? 'วันเกิด (อายุ)' : 'Date of Birth (Age)'}</span>
+                            <strong class="summary-value">${dobDisplay}</strong>
+                        </div>
+                        <div class="summary-item">
+                            <span class="summary-label">🏛️ ${lang === 'th' ? 'ประสบการณ์โบราณคดี' : 'Experience'}</span>
+                            <strong class="summary-value">${expText}</strong>
+                        </div>
+                        <div class="summary-item">
+                            <span class="summary-label">🧭 ${lang === 'th' ? 'บทบาทหน้าที่' : 'Expedition Role(s)'}</span>
+                            <strong class="summary-value">${rolesDisplay}</strong>
+                        </div>
+                        <div class="summary-item">
+                            <span class="summary-label">🌍 ${lang === 'th' ? 'ภูมิภาคที่เลือก' : 'Expedition Region'}</span>
+                            <strong class="summary-value">${regionDisplay}</strong>
+                        </div>
+                        <div class="summary-item">
+                            <span class="summary-label">💰 ${lang === 'th' ? 'เงินเดือนที่ขอ' : 'Desired Salary'}</span>
+                            <strong class="summary-value highlight-salary">${salaryDisplay}</strong>
+                        </div>
+                        <div class="summary-item">
+                            <span class="summary-label">💬 ${lang === 'th' ? 'ช่องทางติดต่อที่สะดวก' : 'Contact Method'}</span>
+                            <strong class="summary-value">${methodDisplay}</strong>
+                        </div>
+                        <div class="summary-item full-width">
+                            <span class="summary-label">📄 ${lang === 'th' ? 'ไฟล์เอกสารยืนยันตัวตน' : 'Uploaded Passport / ID'}</span>
+                            <strong class="summary-value">📎 ${passportFileName}</strong>
+                        </div>
+                        <div class="summary-item full-width">
+                            <span class="summary-label">📝 ${lang === 'th' ? 'ความคิดเห็นเพิ่มเติม' : 'Additional Comments'}</span>
+                            <span class="summary-value" style="font-weight: 500; color: var(--text-dark);">${commentsVal}</span>
+                        </div>
+                    </div>
+                `;
+            }
+
             if (successModal) {
                 successModal.classList.add('active');
                 document.body.style.overflow = 'hidden';
-            } else {
-                alert(currentLanguage === 'th' 
-                    ? "ส่งใบสมัครสำเร็จ! ข้อมูลของคุณได้รับการบันทึกเรียบร้อยแล้ว" 
-                    : "Registration Submitted! Welcome to the Eldoria Expedition.");
             }
         });
     }
