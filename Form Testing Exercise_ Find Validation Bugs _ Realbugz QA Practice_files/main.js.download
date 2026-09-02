@@ -15,7 +15,7 @@ const i18n = {
         "opt-amateur": "Amateur (up to 1 year)",
         "opt-inter": "Intermediate (1–5 years)",
         "opt-prof": "Professional (more than 5 years)",
-        "label-roles": "Preferred Role in the Expedition",
+        "label-roles": "Preferred Role in the Expedition (Max 2)*",
         "role-researcher": "Researcher",
         "role-photographer": "Photographer",
         "role-drone": "Drone Operator",
@@ -57,7 +57,7 @@ const i18n = {
         "chk-email": "Valid Email",
         "chk-phone": "Phone (XX-XXX-XXXX)",
         "chk-dob": "Age 18-50 Years",
-        "chk-role": "Expedition Role",
+        "chk-role": "Expedition Role (1-2 Roles)",
         "chk-region": "Expedition Region",
         "chk-salary": "Salary Within Limit",
         "chk-passport": "Passport / ID Uploaded",
@@ -97,7 +97,7 @@ const i18n = {
         "opt-amateur": "ระดับฝึกหัด (ไม่เกิน 1 ปี)",
         "opt-inter": "ระดับกลาง (1–5 ปี)",
         "opt-prof": "ระดับมืออาชีพ (มากกว่า 5 ปี)",
-        "label-roles": "บทบาทที่ต้องการในการสำรวจ",
+        "label-roles": "บทบาทที่ต้องการในการสำรวจ (เลือกได้ไม่เกิน 2 ตำแหน่ง)*",
         "role-researcher": "นักวิจัย",
         "role-photographer": "ช่างภาพ",
         "role-drone": "ผู้ควบคุมโดรน",
@@ -139,7 +139,7 @@ const i18n = {
         "chk-email": "อีเมลถูกต้อง",
         "chk-phone": "เบอร์โทรศัพท์ (63-XXX-XXXX)",
         "chk-dob": "อายุ 18-50 ปี",
-        "chk-role": "บทบาทหน้าที่",
+        "chk-role": "บทบาทหน้าที่ (1-2 ตำแหน่ง)",
         "chk-region": "ภูมิภาคสำรวจ",
         "chk-salary": "เงินเดือนตามเกณฑ์",
         "chk-passport": "อัปโหลดพาสปอร์ต/บัตรประชาชน",
@@ -414,7 +414,8 @@ const checklistDefinitions = [
         id: 'chk-role',
         fieldId: 'photographer',
         validate: () => {
-            return document.querySelectorAll('input[name="role"]:checked').length > 0;
+            const count = document.querySelectorAll('input[name="role"]:checked').length;
+            return count >= 1 && count <= 2;
         }
     },
     {
@@ -643,6 +644,36 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
+
+    // Role selection limiter: Maximum 2 roles allowed
+    const roleCheckboxes = document.querySelectorAll('input[name="role"]');
+    const roleLimitHint = document.getElementById('roleLimitHint');
+
+    roleCheckboxes.forEach(cb => {
+        cb.addEventListener('change', function() {
+            const checkedBoxes = document.querySelectorAll('input[name="role"]:checked');
+            if (checkedBoxes.length > 2) {
+                this.checked = false; // Block selecting the 3rd role
+                if (roleLimitHint) {
+                    roleLimitHint.textContent = currentLanguage === 'th'
+                        ? "* สามารถเลือกบทบาทหน้าที่ได้สูงสุดไม่เกิน 2 ตำแหน่งเท่านั้น"
+                        : "* You can select a maximum of 2 roles only.";
+                    roleLimitHint.classList.add('visible');
+                    setTimeout(() => {
+                        if (roleLimitHint) roleLimitHint.classList.remove('visible');
+                    }, 3500);
+                } else {
+                    alert(currentLanguage === 'th'
+                        ? "สามารถเลือกบทบาทหน้าที่ได้สูงสุดไม่เกิน 2 ตำแหน่งเท่านั้น"
+                        : "You can select a maximum of 2 roles only.");
+                }
+            } else if (roleLimitHint) {
+                roleLimitHint.classList.remove('visible');
+            }
+            window.updateReadinessChecklist();
+        });
+    });
+
     // 7. Custom Interactive Purple & Gold Slider
     const minSalary = 700;
     const maxSalary = 2250;
@@ -786,12 +817,18 @@ document.addEventListener("DOMContentLoaded", () => {
                 return;
             }
 
-            // F. Role: At least one selected
+            // F. Role: Exactly 1 or 2 selected (Max 2)
             const selectedRoles = document.querySelectorAll('input[name="role"]:checked');
             if (selectedRoles.length === 0) {
                 alert(currentLanguage === 'th' 
                     ? "โปรดเลือกบทบาทที่ต้องการในการสำรวจอย่างน้อย 1 ตำแหน่ง" 
                     : "Please select at least one role in the expedition.");
+                return;
+            }
+            if (selectedRoles.length > 2) {
+                alert(currentLanguage === 'th' 
+                    ? "สามารถเลือกบทบาทหน้าที่ได้สูงสุดไม่เกิน 2 ตำแหน่งเท่านั้น" 
+                    : "You can select a maximum of 2 roles only.");
                 return;
             }
 
