@@ -49,6 +49,14 @@ const i18n = {
         "placeholder-email": "e.g., test@email.com",
         "placeholder-phone": "e.g., 63-416-9816",
         "placeholder-comments": "Additional notes or inquiries...",
+                // Country Names EN
+        "country-th": "Thailand (+66)",
+        "country-us": "United States (+1)",
+        "country-gb": "United Kingdom (+44)",
+        "country-jp": "Japan (+81)",
+        "country-sg": "Singapore (+65)",
+        "country-au": "Australia (+61)",
+        "country-kr": "South Korea (+82)",
         "readiness-title": "Readiness",
         // Checklist Labels EN
         "chk-id": "Applicant ID (11 digits)",
@@ -131,6 +139,14 @@ const i18n = {
         "placeholder-email": "เช่น test@email.com",
         "placeholder-phone": "เช่น 63-416-9816",
         "placeholder-comments": "ข้อความหรือข้อสงสัยเพิ่มเติม...",
+                // Country Names TH
+        "country-th": "ไทย (+66)",
+        "country-us": "สหรัฐอเมริกา (+1)",
+        "country-gb": "สหราชอาณาจักร (+44)",
+        "country-jp": "ญี่ปุ่น (+81)",
+        "country-sg": "สิงคโปร์ (+65)",
+        "country-au": "ออสเตรเลีย (+61)",
+        "country-kr": "เกาหลีใต้ (+82)",
         "readiness-title": "ความพร้อมส่งงาน",
         // Checklist Labels TH
         "chk-id": "รหัสนักศึกษา (11 หลัก)",
@@ -410,6 +426,18 @@ function updateCountryPhoneUI() {
     const countrySelect = document.getElementById('countryCode');
     const contactNumber = document.getElementById('contactNumber');
     if (!countrySelect || !contactNumber) return;
+
+    // Translate each country option in the dropdown
+    Array.from(countrySelect.options).forEach(opt => {
+        const code = opt.value;
+        const rule = countryPhoneRules[code];
+        if (rule) {
+            opt.textContent = currentLanguage === 'th'
+                ? `${rule.nameTh} (${code})`
+                : `${rule.country} (${code})`;
+        }
+    });
+
     const country = countrySelect.value;
     const rule = countryPhoneRules[country] || countryPhoneRules['+66'];
 
