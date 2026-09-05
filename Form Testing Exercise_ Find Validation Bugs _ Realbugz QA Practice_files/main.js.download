@@ -992,16 +992,27 @@ document.addEventListener("DOMContentLoaded", () => {
             }
 
             // Send OTP Code
+            if (otpStatusHint) {
+                otpStatusHint.textContent = currentLanguage === 'th' ? "กำลังส่งรหัสยืนยัน..." : "Sending verification code...";
+                otpStatusHint.className = "otp-status-hint info";
+            }
+
             sendOtpCode(emailVal).then(result => {
-                if (result.mode === 'demo') {
-                    // Show notification popup with the generated OTP code for instant testing
-                    alert(currentLanguage === 'th'
-                        ? `📨 [ระบบยืนยันอีเมล EmailJS]\n\nเราได้จำลองการส่งรหัสไปยัง: ${emailVal}\n\n🔑 รหัส OTP ของคุณคือ: ${currentGeneratedOTP}\n(นำรหัสนี้ไปกรอกในช่องยืนยันได้ทันที - รหัสมีอายุ 5 นาที)`
-                        : `📨 [EmailJS Verification]\n\nVerification code simulated for: ${emailVal}\n\n🔑 Your OTP Code is: ${currentGeneratedOTP}\n(Enter this code in the verification box - Valid for 5 minutes)`);
+                if (result.mode === 'real') {
+                    if (otpStatusHint) {
+                        otpStatusHint.innerHTML = currentLanguage === 'th'
+                            ? `📨 ส่งรหัสยืนยันไปยัง <strong>${emailVal}</strong> เรียบร้อยแล้ว! โปรดตรวจสอบในกล่องจดหมาย (Inbox/Spam)`
+                            : `📨 Verification code has been sent to <strong>${emailVal}</strong>! Please check your inbox or spam.`;
+                        otpStatusHint.className = "otp-status-hint success";
+                    }
                 } else {
-                    alert(currentLanguage === 'th'
-                        ? `📨 ส่งรหัสยืนยันไปยังอีเมล ${emailVal} เรียบร้อยแล้ว! โปรดตรวจสอบกล่องจดหมายของคุณ`
-                        : `📨 Verification code sent to ${emailVal}! Please check your email inbox.`);
+                    // Demo / Unconfigured Key Mode: Show code neatly inline without disruptive alert popup
+                    if (otpStatusHint) {
+                        otpStatusHint.innerHTML = currentLanguage === 'th'
+                            ? `📨 <strong>[โหมดจำลอง EmailJS]:</strong> รหัส OTP สำหรับ <u>${emailVal}</u> คือ: <strong style="font-size:15px; color:#7B2CBF; letter-spacing:2px;">${currentGeneratedOTP}</strong><br><small style="color:#666;">*หากต้องการให้ส่งเข้ากล่องจดหมายจริง ให้ใส่ Key ใน EMAILJS_CONFIG ในไฟล์ main.js</small>`
+                            : `📨 <strong>[EmailJS Demo Mode]:</strong> Verification code for <u>${emailVal}</u> is: <strong style="font-size:15px; color:#7B2CBF; letter-spacing:2px;">${currentGeneratedOTP}</strong><br><small style="color:#666;">*To send real emails to your inbox, configure your keys in EMAILJS_CONFIG in main.js</small>`;
+                        otpStatusHint.className = "otp-status-hint info";
+                    }
                 }
             });
         });
