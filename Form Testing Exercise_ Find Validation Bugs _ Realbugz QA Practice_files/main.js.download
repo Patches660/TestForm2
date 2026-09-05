@@ -62,7 +62,17 @@ const i18n = {
         "chk-id": "Applicant ID (11 digits)",
         "chk-fname": "First Name (5+ letters)",
         "chk-lname": "Last Name (5+ letters)",
-        "chk-email": "Valid Email",
+                // OTP Email Verification EN
+        "btn-send-otp": "Send Code",
+        "btn-verify-otp": "Verify Code",
+        "otp-enter-desc": "Enter the 6-digit code sent to your email:",
+        "email-verified-success": "Email Verified Successfully",
+        "otp-sent-alert": "Verification code has been sent to your email! (Valid for 5 minutes)",
+        "otp-err-invalid-email": "Please enter a valid email address first.",
+        "otp-err-wrong-code": "Incorrect verification code. Please check and try again.",
+        "otp-err-expired": "Verification code has expired. Please request a new code.",
+        "chk-email": "Email Verified (OTP)",
+
         "chk-phone": "Phone (XX-XXX-XXXX)",
         "chk-dob": "Age 18-50 Years",
         "chk-role": "Expedition Role (1-2 Roles)",
@@ -152,7 +162,17 @@ const i18n = {
         "chk-id": "รหัสนักศึกษา (11 หลัก)",
         "chk-fname": "ชื่อ (5 ตัวขึ้นไป)",
         "chk-lname": "นามสกุล (5 ตัวขึ้นไป)",
-        "chk-email": "อีเมลถูกต้อง",
+                // OTP Email Verification TH
+        "btn-send-otp": "ส่งรหัสยืนยัน",
+        "btn-verify-otp": "ยืนยันรหัส",
+        "otp-enter-desc": "กรอกรหัส 6 หลักที่ได้รับทางอีเมลของคุณ:",
+        "email-verified-success": "ยืนยันอีเมลสำเร็จแล้ว",
+        "otp-sent-alert": "ส่งรหัสยืนยันไปยังอีเมลของคุณเรียบร้อยแล้ว! (รหัสมีอายุ 5 นาที)",
+        "otp-err-invalid-email": "โปรดกรอกอีเมลที่ถูกต้องก่อนกดขอรหัส",
+        "otp-err-wrong-code": "รหัสยืนยันไม่ถูกต้อง โปรดตรวจสอบแล้วลองอีกครั้ง",
+        "otp-err-expired": "รหัสยืนยันหมดอายุแล้ว โปรดขอรหัสใหม่",
+        "chk-email": "ยืนยันอีเมลแล้ว (OTP)",
+
         "chk-phone": "เบอร์โทรศัพท์ (63-XXX-XXXX)",
         "chk-dob": "อายุ 18-50 ปี",
         "chk-role": "บทบาทหน้าที่ (1-2 ตำแหน่ง)",
@@ -184,6 +204,64 @@ const i18n = {
 };
 
 let currentLanguage = 'en';
+
+
+// ==============================================================
+// EmailJS & OTP Email Verification Engine
+// ==============================================================
+// How to connect your own free EmailJS keys:
+// 1. Sign up at https://www.emailjs.com/
+// 2. Add your Email Service (e.g. Gmail) -> get serviceId
+// 3. Create Template with {{otp_code}} -> get templateId
+// 4. Account -> get publicKey
+const EMAILJS_CONFIG = {
+    publicKey: "YOUR_PUBLIC_KEY",       // Replace with your EmailJS Public Key
+    serviceId: "YOUR_SERVICE_ID",       // Replace with your EmailJS Service ID
+    templateId: "YOUR_TEMPLATE_ID"      // Replace with your EmailJS Template ID
+};
+
+let currentGeneratedOTP = null;
+let otpExpiresAt = null;
+let isEmailVerified = false;
+let verifiedEmailAddress = '';
+let otpCountdownTimer = null;
+
+// Initialize EmailJS if real key is present
+if (window.emailjs && EMAILJS_CONFIG.publicKey !== "YOUR_PUBLIC_KEY") {
+    try {
+        emailjs.init({ publicKey: EMAILJS_CONFIG.publicKey });
+    } catch (e) {
+        console.warn("EmailJS init warning:", e);
+    }
+}
+
+// Function to send OTP via EmailJS (with smart instant demo fallback)
+function sendOtpCode(targetEmail) {
+    // Generate secure random 6-digit OTP
+    currentGeneratedOTP = Math.floor(100000 + Math.random() * 900000).toString();
+    otpExpiresAt = Date.now() + 5 * 60 * 1000; // 5 minutes validity
+
+    console.log(`[EmailJS] OTP for ${targetEmail}: ${currentGeneratedOTP}`);
+
+    // If real EmailJS keys are provided, send actual email via EmailJS API
+    if (window.emailjs && EMAILJS_CONFIG.publicKey !== "YOUR_PUBLIC_KEY") {
+        return emailjs.send(EMAILJS_CONFIG.serviceId, EMAILJS_CONFIG.templateId, {
+            to_email: targetEmail,
+            otp_code: currentGeneratedOTP,
+            subject: "Your Eldoria Expedition Verification Code: " + currentGeneratedOTP
+        }).then(response => {
+            console.log("EmailJS SUCCESS:", response.status, response.text);
+            return { success: true, mode: 'real' };
+        }).catch(err => {
+            console.error("EmailJS FAILED:", err);
+            // Fallback gracefully to demo alert
+            return { success: true, mode: 'demo', fallbackError: err };
+        });
+    } else {
+        // Instant Demo Mode (Works out-of-the-box on GitHub Pages without API setup!)
+        return Promise.resolve({ success: true, mode: 'demo' });
+    }
+}
 
 // Helper: Calculate Age from YYYY-MM-DD
 function calculateAge(birthDateStr) {
@@ -563,7 +641,8 @@ const checklistDefinitions = [
         fieldId: 'email',
         validate: () => {
             const val = (document.getElementById('email')?.value || '').trim();
-            return /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(val);
+            const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+            return emailPattern.test(val) && isEmailVerified && (val.toLowerCase() === verifiedEmailAddress.toLowerCase());
         }
     },
     {
@@ -826,6 +905,160 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
 
+
+    // ==========================================
+    // Email OTP UI Controller
+    // ==========================================
+    const btnSendOtp = document.getElementById('btnSendOtp');
+    const otpVerificationBox = document.getElementById('otpVerificationBox');
+    const otpInput = document.getElementById('otpInput');
+    const btnVerifyOtp = document.getElementById('btnVerifyOtp');
+    const otpCountdown = document.getElementById('otpCountdown');
+    const otpStatusHint = document.getElementById('otpStatusHint');
+    const emailVerifiedBadge = document.getElementById('emailVerifiedBadge');
+    const emailErrorHint = document.getElementById('emailErrorHint');
+
+    // Reset verification status if user changes the email input
+    if (email) {
+        email.addEventListener('input', function() {
+            if (isEmailVerified && this.value.trim().toLowerCase() !== verifiedEmailAddress.toLowerCase()) {
+                isEmailVerified = false;
+                verifiedEmailAddress = '';
+                if (emailVerifiedBadge) emailVerifiedBadge.style.display = 'none';
+                if (otpVerificationBox) otpVerificationBox.style.display = 'none';
+                if (otpStatusHint) otpStatusHint.style.display = 'none';
+                if (btnSendOtp) {
+                    btnSendOtp.disabled = false;
+                    btnSendOtp.textContent = currentLanguage === 'th' ? "ส่งรหัสยืนยัน" : "Send Code";
+                }
+                clearInterval(otpCountdownTimer);
+                if (otpCountdown) otpCountdown.textContent = '';
+                window.updateReadinessChecklist();
+            }
+        });
+    }
+
+    // Send OTP Handler
+    if (btnSendOtp) {
+        btnSendOtp.addEventListener('click', function() {
+            const emailVal = (email?.value || '').trim();
+            const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+
+            if (!emailPattern.test(emailVal)) {
+                if (emailErrorHint) {
+                    emailErrorHint.textContent = currentLanguage === 'th' 
+                        ? "* โปรดกรอกอีเมลที่ถูกต้องก่อนกดขอรับรหัส" 
+                        : "* Please enter a valid email address first.";
+                    emailErrorHint.classList.add('visible');
+                }
+                email.focus();
+                return;
+            } else if (emailErrorHint) {
+                emailErrorHint.classList.remove('visible');
+            }
+
+            // Disable button and start 60s cooldown
+            btnSendOtp.disabled = true;
+            let cooldown = 60;
+            btnSendOtp.textContent = currentLanguage === 'th' ? `ส่งอีกครั้งใน ${cooldown}s` : `Resend in ${cooldown}s`;
+
+            if (otpCountdownTimer) clearInterval(otpCountdownTimer);
+            otpCountdownTimer = setInterval(() => {
+                cooldown--;
+                if (cooldown > 0) {
+                    btnSendOtp.textContent = currentLanguage === 'th' ? `ส่งอีกครั้งใน ${cooldown}s` : `Resend in ${cooldown}s`;
+                    if (otpCountdown) {
+                        const mins = Math.floor((otpExpiresAt - Date.now()) / 60000);
+                        const secs = Math.floor(((otpExpiresAt - Date.now()) % 60000) / 1000);
+                        if (Date.now() < otpExpiresAt) {
+                            otpCountdown.textContent = currentLanguage === 'th' 
+                                ? `(รหัสหมดอายุใน ${mins}:${secs < 10 ? '0' : ''}${secs})` 
+                                : `(Expires in ${mins}:${secs < 10 ? '0' : ''}${secs})`;
+                        } else {
+                            otpCountdown.textContent = currentLanguage === 'th' ? "(รหัสหมดอายุแล้ว)" : "(Expired)";
+                        }
+                    }
+                } else {
+                    clearInterval(otpCountdownTimer);
+                    btnSendOtp.disabled = false;
+                    btnSendOtp.textContent = currentLanguage === 'th' ? "ส่งรหัสยืนยัน" : "Send Code";
+                }
+            }, 1000);
+
+            // Show OTP input box
+            if (otpVerificationBox) {
+                otpVerificationBox.style.display = 'block';
+                if (otpInput) otpInput.focus();
+            }
+
+            // Send OTP Code
+            sendOtpCode(emailVal).then(result => {
+                if (result.mode === 'demo') {
+                    // Show notification popup with the generated OTP code for instant testing
+                    alert(currentLanguage === 'th'
+                        ? `📨 [ระบบยืนยันอีเมล EmailJS]\n\nเราได้จำลองการส่งรหัสไปยัง: ${emailVal}\n\n🔑 รหัส OTP ของคุณคือ: ${currentGeneratedOTP}\n(นำรหัสนี้ไปกรอกในช่องยืนยันได้ทันที - รหัสมีอายุ 5 นาที)`
+                        : `📨 [EmailJS Verification]\n\nVerification code simulated for: ${emailVal}\n\n🔑 Your OTP Code is: ${currentGeneratedOTP}\n(Enter this code in the verification box - Valid for 5 minutes)`);
+                } else {
+                    alert(currentLanguage === 'th'
+                        ? `📨 ส่งรหัสยืนยันไปยังอีเมล ${emailVal} เรียบร้อยแล้ว! โปรดตรวจสอบกล่องจดหมายของคุณ`
+                        : `📨 Verification code sent to ${emailVal}! Please check your email inbox.`);
+                }
+            });
+        });
+    }
+
+    // Verify OTP Handler
+    if (btnVerifyOtp) {
+        btnVerifyOtp.addEventListener('click', function() {
+            const enteredCode = (otpInput?.value || '').trim();
+
+            if (!enteredCode) {
+                if (otpStatusHint) {
+                    otpStatusHint.textContent = currentLanguage === 'th' ? "โปรดกรอกรหัส 6 หลัก" : "Please enter the 6-digit code.";
+                    otpStatusHint.className = "otp-status-hint error";
+                }
+                otpInput.focus();
+                return;
+            }
+
+            if (!otpExpiresAt || Date.now() > otpExpiresAt) {
+                if (otpStatusHint) {
+                    otpStatusHint.textContent = currentLanguage === 'th' 
+                        ? "รหัสยืนยันหมดอายุแล้ว โปรดกดขอรหัสใหม่อีกครั้ง" 
+                        : "Verification code has expired. Please request a new code.";
+                    otpStatusHint.className = "otp-status-hint error";
+                }
+                return;
+            }
+
+            if (enteredCode === currentGeneratedOTP) {
+                // Success!
+                isEmailVerified = true;
+                verifiedEmailAddress = (email?.value || '').trim();
+                
+                if (otpStatusHint) {
+                    otpStatusHint.textContent = currentLanguage === 'th' ? "ยืนยันรหัสถูกต้องเรียบร้อยแล้ว!" : "Code verified successfully!";
+                    otpStatusHint.className = "otp-status-hint success";
+                }
+
+                setTimeout(() => {
+                    if (otpVerificationBox) otpVerificationBox.style.display = 'none';
+                    if (emailVerifiedBadge) emailVerifiedBadge.style.display = 'inline-flex';
+                }, 800);
+
+                window.updateReadinessChecklist();
+            } else {
+                if (otpStatusHint) {
+                    otpStatusHint.textContent = currentLanguage === 'th' 
+                        ? "รหัสยืนยันไม่ถูกต้อง โปรดตรวจสอบอีกครั้ง" 
+                        : "Incorrect verification code. Please check and try again.";
+                    otpStatusHint.className = "otp-status-hint error";
+                }
+                otpInput.focus();
+            }
+        });
+    }
+
     // Role selection limiter: Maximum 2 roles allowed
     const roleCheckboxes = document.querySelectorAll('input[name="role"]');
     const roleLimitHint = document.getElementById('roleLimitHint');
@@ -988,7 +1221,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 return;
             }
 
-            // C. Email
+            // C. Email Validation & OTP Verification Check
             const emailVal = (email?.value || '').trim();
             const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
             if (!emailPattern.test(emailVal)) {
@@ -996,6 +1229,14 @@ document.addEventListener("DOMContentLoaded", () => {
                     ? "โปรดใส่อีเมลในรูปแบบที่ถูกต้อง เช่น test@email.com" 
                     : "Please enter a valid email address (e.g., test@email.com).");
                 email.focus();
+                return;
+            }
+
+            if (!isEmailVerified || emailVal.toLowerCase() !== verifiedEmailAddress.toLowerCase()) {
+                alert(currentLanguage === 'th'
+                    ? "โปรดยืนยันอีเมลด้วยรหัส OTP ให้สำเร็จก่อนกดส่งใบสมัคร"
+                    : "Please verify your email with the OTP code before submitting.");
+                if (btnSendOtp) btnSendOtp.focus();
                 return;
             }
 
@@ -1216,7 +1457,15 @@ window.autoFillForm = function() {
     if (applicantId) applicantId.value = '66010123456'; // Exactly 11 digits
     if (firstName) firstName.value = 'AAAAAAAAAAAA';
     if (lastName) lastName.value = 'AAAAAA';
-    if (email) email.value = 'oavatan@gmail.com';
+        if (email) {
+        email.value = 'oavatan@gmail.com';
+        isEmailVerified = true;
+        verifiedEmailAddress = 'oavatan@gmail.com';
+        const emailVerifiedBadge = document.getElementById('emailVerifiedBadge');
+        if (emailVerifiedBadge) emailVerifiedBadge.style.display = 'inline-flex';
+        const otpVerificationBox = document.getElementById('otpVerificationBox');
+        if (otpVerificationBox) otpVerificationBox.style.display = 'none';
+    }
         const countrySelect = document.getElementById('countryCode');
     if (countrySelect) countrySelect.value = '+66';
     updateCountryPhoneUI();

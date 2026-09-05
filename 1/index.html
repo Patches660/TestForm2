@@ -11,7 +11,9 @@
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
     
     <!-- Stylesheet with Cache Buster (?v=3) -->
-    <link rel="stylesheet" href="../Form Testing Exercise_ Find Validation Bugs _ Realbugz QA Practice_files/main.css?v=208">
+    <link rel="stylesheet" href="../Form Testing Exercise_ Find Validation Bugs _ Realbugz QA Practice_files/main.css?v=209">
+    <!-- EmailJS Official Browser SDK -->
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 </head>
 <body>
     <!-- Floating Magical Orbs for animated background -->
@@ -88,10 +90,32 @@
                         </div>
                     </div>
 
-                    <div class="form-group">
+                                        <div class="form-group email-verification-group">
                         <label for="email" data-i18n="label-email">Email*</label>
-                        <!-- Bug 1: Mismatched Input Type (type="text" instead of "email") -->
-                        <input type="email" id="email" name="email" placeholder="e.g., test@email.com" required>
+                        <div class="email-input-action-row">
+                            <input type="email" id="email" name="email" placeholder="e.g., test@email.com" required autocomplete="email">
+                            <button type="button" class="btn-send-otp" id="btnSendOtp" data-i18n="btn-send-otp">Send Code</button>
+                        </div>
+                        <div id="emailErrorHint" class="input-error-hint"></div>
+                        
+                        <!-- OTP Verification Box (Slides down once code is sent) -->
+                        <div class="otp-verification-box" id="otpVerificationBox" style="display: none;">
+                            <div class="otp-instruction-row">
+                                <span data-i18n="otp-enter-desc">Enter the 6-digit code sent to your email:</span>
+                                <span class="otp-countdown" id="otpCountdown"></span>
+                            </div>
+                            <div class="otp-input-action-row">
+                                <input type="text" id="otpInput" maxlength="6" pattern="[0-9]{6}" placeholder="e.g., 639145" autocomplete="one-time-code">
+                                <button type="button" class="btn-verify-otp" id="btnVerifyOtp" data-i18n="btn-verify-otp">Verify Code</button>
+                            </div>
+                            <div id="otpStatusHint" class="otp-status-hint"></div>
+                        </div>
+
+                        <!-- Verified Badge (Shown once verified) -->
+                        <div class="email-verified-badge" id="emailVerifiedBadge" style="display: none;">
+                            <span class="badge-icon">✅</span>
+                            <span data-i18n="email-verified-success">Email Verified Successfully</span>
+                        </div>
                     </div>
 
                     <div class="form-group">
@@ -268,7 +292,7 @@
     </footer>
 
     <!-- JavaScript with Cache Buster (?v=3) -->
-    <script src="../Form Testing Exercise_ Find Validation Bugs _ Realbugz QA Practice_files/main.js.download?v=208"></script>
+    <script src="../Form Testing Exercise_ Find Validation Bugs _ Realbugz QA Practice_files/main.js.download?v=209"></script>
     
 
     <!-- Terms and Conditions Modal -->
