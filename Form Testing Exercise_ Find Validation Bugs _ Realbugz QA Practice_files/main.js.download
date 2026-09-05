@@ -215,9 +215,9 @@ let currentLanguage = 'en';
 // 3. Create Template with {{otp_code}} -> get templateId
 // 4. Account -> get publicKey
 const EMAILJS_CONFIG = {
-    publicKey: "YOUR_PUBLIC_KEY",       // Replace with your EmailJS Public Key
-    serviceId: "YOUR_SERVICE_ID",       // Replace with your EmailJS Service ID
-    templateId: "YOUR_TEMPLATE_ID"      // Replace with your EmailJS Template ID
+    publicKey: "pJxoR0jf2aj4qNih-",       // Connected EmailJS Public Key
+    serviceId: "service_4aihlkj",       // Connected EmailJS Service ID
+    templateId: "template_knv4p6b"      // Connected EmailJS Template ID
 };
 
 let currentGeneratedOTP = null;
@@ -243,22 +243,34 @@ function sendOtpCode(targetEmail) {
 
     console.log(`[EmailJS] OTP for ${targetEmail}: ${currentGeneratedOTP}`);
 
-    // If real EmailJS keys are provided, send actual email via EmailJS API
+    // Send actual email via EmailJS API with all common template parameters
     if (window.emailjs && EMAILJS_CONFIG.publicKey !== "YOUR_PUBLIC_KEY") {
-        return emailjs.send(EMAILJS_CONFIG.serviceId, EMAILJS_CONFIG.templateId, {
+        const templateParams = {
             to_email: targetEmail,
+            email: targetEmail,
+            user_email: targetEmail,
+            recipient: targetEmail,
+            reply_to: targetEmail,
             otp_code: currentGeneratedOTP,
-            subject: "Your Eldoria Expedition Verification Code: " + currentGeneratedOTP
-        }).then(response => {
-            console.log("EmailJS SUCCESS:", response.status, response.text);
-            return { success: true, mode: 'real' };
-        }).catch(err => {
-            console.error("EmailJS FAILED:", err);
-            // Fallback gracefully to demo alert
-            return { success: true, mode: 'demo', fallbackError: err };
-        });
+            otp: currentGeneratedOTP,
+            code: currentGeneratedOTP,
+            passcode: currentGeneratedOTP,
+            to_name: targetEmail.split('@')[0],
+            name: targetEmail.split('@')[0],
+            message: `Your Eldoria Expedition verification code is: ${currentGeneratedOTP}`,
+            subject: `Your Eldoria Expedition Verification Code: ${currentGeneratedOTP}`
+        };
+
+        return emailjs.send(EMAILJS_CONFIG.serviceId, EMAILJS_CONFIG.templateId, templateParams, EMAILJS_CONFIG.publicKey)
+            .then(response => {
+                console.log("EmailJS SUCCESS:", response.status, response.text);
+                return { success: true, mode: 'real' };
+            })
+            .catch(err => {
+                console.error("EmailJS FAILED:", err);
+                return { success: false, mode: 'error', error: err };
+            });
     } else {
-        // Instant Demo Mode (Works out-of-the-box on GitHub Pages without API setup!)
         return Promise.resolve({ success: true, mode: 'demo' });
     }
 }
@@ -998,19 +1010,26 @@ document.addEventListener("DOMContentLoaded", () => {
             }
 
             sendOtpCode(emailVal).then(result => {
-                if (result.mode === 'real') {
+                if (result.success && result.mode === 'real') {
                     if (otpStatusHint) {
                         otpStatusHint.innerHTML = currentLanguage === 'th'
                             ? `📨 ส่งรหัสยืนยันไปยัง <strong>${emailVal}</strong> เรียบร้อยแล้ว! โปรดตรวจสอบในกล่องจดหมาย (Inbox/Spam)`
-                            : `📨 Verification code has been sent to <strong>${emailVal}</strong>! Please check your inbox or spam.`;
+                            : `📨 Verification code has been sent to <strong>${emailVal}</strong>! Please check your inbox or spam folder.`;
                         otpStatusHint.className = "otp-status-hint success";
                     }
-                } else {
-                    // Demo / Unconfigured Key Mode: Show code neatly inline without disruptive alert popup
+                } else if (result.mode === 'error') {
+                    const errDetail = result.error?.text || result.error?.message || "Failed to send email";
                     if (otpStatusHint) {
                         otpStatusHint.innerHTML = currentLanguage === 'th'
-                            ? `📨 <strong>[โหมดจำลอง EmailJS]:</strong> รหัส OTP สำหรับ <u>${emailVal}</u> คือ: <strong style="font-size:15px; color:#7B2CBF; letter-spacing:2px;">${currentGeneratedOTP}</strong><br><small style="color:#666;">*หากต้องการให้ส่งเข้ากล่องจดหมายจริง ให้ใส่ Key ใน EMAILJS_CONFIG ในไฟล์ main.js</small>`
-                            : `📨 <strong>[EmailJS Demo Mode]:</strong> Verification code for <u>${emailVal}</u> is: <strong style="font-size:15px; color:#7B2CBF; letter-spacing:2px;">${currentGeneratedOTP}</strong><br><small style="color:#666;">*To send real emails to your inbox, configure your keys in EMAILJS_CONFIG in main.js</small>`;
+                            ? `⚠️ ไม่สามารถส่งอีเมลได้ (${errDetail})<br>🔑 [รหัสสำรองสำหรับทดสอบ] รหัส OTP ของคุณคือ: <strong style="color:#7B2CBF; font-size:15px; letter-spacing:2px;">${currentGeneratedOTP}</strong>`
+                            : `⚠️ Could not send email (${errDetail})<br>🔑 [Backup for testing] Your OTP is: <strong style="color:#7B2CBF; font-size:15px; letter-spacing:2px;">${currentGeneratedOTP}</strong>`;
+                        otpStatusHint.className = "otp-status-hint error";
+                    }
+                } else {
+                    if (otpStatusHint) {
+                        otpStatusHint.innerHTML = currentLanguage === 'th'
+                            ? `📨 <strong>[โหมดจำลอง EmailJS]:</strong> รหัส OTP สำหรับ <u>${emailVal}</u> คือ: <strong style="font-size:15px; color:#7B2CBF; letter-spacing:2px;">${currentGeneratedOTP}</strong>`
+                            : `📨 <strong>[EmailJS Demo]:</strong> Verification code for <u>${emailVal}</u> is: <strong style="font-size:15px; color:#7B2CBF; letter-spacing:2px;">${currentGeneratedOTP}</strong>`;
                         otpStatusHint.className = "otp-status-hint info";
                     }
                 }
