@@ -183,30 +183,188 @@ function calculateAge(birthDateStr) {
     return age;
 }
 
-// Helper: Phone Number Formatter
-// Strips leading 0 (e.g. 063 416 9816 -> 63-416-9816) and formats as XX-XXX-XXXX
-function formatPhoneNumber(val) {
+
+// Country-Specific Phone Number Rules, Formats, and Validations
+const countryPhoneRules = {
+    '+66': {
+        country: 'Thailand',
+        nameTh: 'ไทย',
+        placeholder: 'e.g., 63-416-9816',
+        placeholderTh: 'เช่น 63-416-9816',
+        maxDigits: 9,
+        stripLeadingZero: true,
+        maxlength: 11, // XX-XXX-XXXX
+        format: (digits) => {
+            let res = '';
+            if (digits.length > 0) res += digits.substring(0, 2);
+            if (digits.length > 2) res += '-' + digits.substring(2, 5);
+            if (digits.length > 5) res += '-' + digits.substring(5, 9);
+            return res;
+        },
+        pattern: /^\d{2}-\d{3}-\d{4}$/,
+        validate: (digits) => {
+            if (digits.length !== 9) return { valid: false, msgEn: 'Thai number must be 9 digits (e.g., 63-416-9816).', msgTh: 'เบอร์โทรศัพท์ไทยต้องมี 9 หลัก (เช่น 63-416-9816)' };
+            if (/^(\d)\1{8}$/.test(digits)) return { valid: false, msgEn: 'Repeated dummy digits not allowed.', msgTh: 'ไม่อนุญาตให้ใช้ตัวเลขซ้ำกันทั้งหมด (เช่น 88-888-8888)' };
+            if (digits === '123456789' || digits === '987654321') return { valid: false, msgEn: 'Sequential digits not allowed.', msgTh: 'ไม่อนุญาตให้ใช้ตัวเลขเรียงลำดับ' };
+            if (!['6', '8', '9'].includes(digits[0])) return { valid: false, msgEn: 'Thai mobile numbers must start with 6, 8, or 9.', msgTh: 'เบอร์มือถือไทยต้องขึ้นต้นด้วย 6, 8 หรือ 9 (เช่น 63-416-9816)' };
+            return { valid: true };
+        }
+    },
+    '+1': {
+        country: 'United States',
+        nameTh: 'สหรัฐอเมริกา',
+        placeholder: 'e.g., 202-555-0143',
+        placeholderTh: 'เช่น 202-555-0143',
+        maxDigits: 10,
+        stripLeadingZero: true,
+        maxlength: 12, // XXX-XXX-XXXX
+        format: (digits) => {
+            let res = '';
+            if (digits.length > 0) res += digits.substring(0, 3);
+            if (digits.length > 3) res += '-' + digits.substring(3, 6);
+            if (digits.length > 6) res += '-' + digits.substring(6, 10);
+            return res;
+        },
+        pattern: /^\d{3}-\d{3}-\d{4}$/,
+        validate: (digits) => {
+            if (digits.length !== 10) return { valid: false, msgEn: 'US phone number must be 10 digits (e.g., 202-555-0143).', msgTh: 'เบอร์โทรศัพท์สหรัฐฯ ต้องมี 10 หลัก (เช่น 202-555-0143)' };
+            if (/^(\d)\1{9}$/.test(digits)) return { valid: false, msgEn: 'Repeated dummy digits not allowed.', msgTh: 'ไม่อนุญาตให้ใช้ตัวเลขซ้ำกันทั้งหมด' };
+            if (digits === '1234567890') return { valid: false, msgEn: 'Sequential digits not allowed.', msgTh: 'ไม่อนุญาตให้ใช้ตัวเลขเรียงลำดับ' };
+            if (digits[0] === '0' || digits[0] === '1') return { valid: false, msgEn: 'US area code cannot start with 0 or 1.', msgTh: 'รหัสพื้นที่สหรัฐฯ ไม่สามารถขึ้นต้นด้วย 0 หรือ 1 ได้' };
+            return { valid: true };
+        }
+    },
+    '+44': {
+        country: 'United Kingdom',
+        nameTh: 'สหราชอาณาจักร',
+        placeholder: 'e.g., 7911-123-456',
+        placeholderTh: 'เช่น 7911-123-456',
+        maxDigits: 10,
+        stripLeadingZero: true, // 07xxx drops leading 0 -> 7xxx
+        maxlength: 12, // XXXX-XXX-XXX
+        format: (digits) => {
+            let res = '';
+            if (digits.length > 0) res += digits.substring(0, 4);
+            if (digits.length > 4) res += '-' + digits.substring(4, 7);
+            if (digits.length > 7) res += '-' + digits.substring(7, 10);
+            return res;
+        },
+        pattern: /^\d{4}-\d{3}-\d{3}$/,
+        validate: (digits) => {
+            if (digits.length !== 10) return { valid: false, msgEn: 'UK mobile number must be 10 digits after +44 (e.g., 7911-123-456).', msgTh: 'เบอร์มือถือสหราชอาณาจักรต้องมี 10 หลัก (เช่น 7911-123-456)' };
+            if (/^(\d)\1{9}$/.test(digits)) return { valid: false, msgEn: 'Repeated dummy digits not allowed.', msgTh: 'ไม่อนุญาตให้ใช้ตัวเลขซ้ำกันทั้งหมด' };
+            if (digits[0] !== '7') return { valid: false, msgEn: 'UK mobile numbers must start with 7 (from 07xxx).', msgTh: 'เบอร์มือถือสหราชอาณาจักรต้องขึ้นต้นด้วย 7 (จาก 07xxx)' };
+            return { valid: true };
+        }
+    },
+    '+81': {
+        country: 'Japan',
+        nameTh: 'ญี่ปุ่น',
+        placeholder: 'e.g., 90-1234-5678',
+        placeholderTh: 'เช่น 90-1234-5678',
+        maxDigits: 10,
+        stripLeadingZero: true, // 090/080/070 drops leading 0 -> 90/80/70
+        maxlength: 12, // XX-XXXX-XXXX
+        format: (digits) => {
+            let res = '';
+            if (digits.length > 0) res += digits.substring(0, 2);
+            if (digits.length > 2) res += '-' + digits.substring(2, 6);
+            if (digits.length > 6) res += '-' + digits.substring(6, 10);
+            return res;
+        },
+        pattern: /^\d{2}-\d{4}-\d{4}$/,
+        validate: (digits) => {
+            if (digits.length !== 10) return { valid: false, msgEn: 'Japan mobile number must be 10 digits (e.g., 90-1234-5678).', msgTh: 'เบอร์มือถือญี่ปุ่นต้องมี 10 หลัก (เช่น 90-1234-5678)' };
+            if (/^(\d)\1{9}$/.test(digits)) return { valid: false, msgEn: 'Repeated dummy digits not allowed.', msgTh: 'ไม่อนุญาตให้ใช้ตัวเลขซ้ำกันทั้งหมด' };
+            if (!['70', '80', '90'].includes(digits.substring(0, 2))) {
+                return { valid: false, msgEn: 'Japan mobile numbers must start with 70, 80, or 90 (e.g., 90-1234-5678).', msgTh: 'เบอร์มือถือญี่ปุ่นต้องขึ้นต้นด้วย 70, 80 หรือ 90 (เช่น 90-1234-5678)' };
+            }
+            return { valid: true };
+        }
+    },
+    '+65': {
+        country: 'Singapore',
+        nameTh: 'สิงคโปร์',
+        placeholder: 'e.g., 8123-4567',
+        placeholderTh: 'เช่น 8123-4567',
+        maxDigits: 8,
+        stripLeadingZero: false,
+        maxlength: 9, // XXXX-XXXX
+        format: (digits) => {
+            let res = '';
+            if (digits.length > 0) res += digits.substring(0, 4);
+            if (digits.length > 4) res += '-' + digits.substring(4, 8);
+            return res;
+        },
+        pattern: /^\d{4}-\d{4}$/,
+        validate: (digits) => {
+            if (digits.length !== 8) return { valid: false, msgEn: 'Singapore phone number must be 8 digits (e.g., 8123-4567).', msgTh: 'เบอร์โทรศัพท์สิงคโปร์ต้องมี 8 หลัก (เช่น 8123-4567)' };
+            if (/^(\d)\1{7}$/.test(digits)) return { valid: false, msgEn: 'Repeated dummy digits not allowed.', msgTh: 'ไม่อนุญาตให้ใช้ตัวเลขซ้ำกันทั้งหมด' };
+            if (!['8', '9'].includes(digits[0])) return { valid: false, msgEn: 'Singapore mobile numbers must start with 8 or 9.', msgTh: 'เบอร์มือถือสิงคโปร์ต้องขึ้นต้นด้วย 8 หรือ 9 (เช่น 8123-4567)' };
+            return { valid: true };
+        }
+    },
+    '+61': {
+        country: 'Australia',
+        nameTh: 'ออสเตรเลีย',
+        placeholder: 'e.g., 412-345-678',
+        placeholderTh: 'เช่น 412-345-678',
+        maxDigits: 9,
+        stripLeadingZero: true, // 04xx drops leading 0 -> 4xx
+        maxlength: 11, // XXX-XXX-XXX
+        format: (digits) => {
+            let res = '';
+            if (digits.length > 0) res += digits.substring(0, 3);
+            if (digits.length > 3) res += '-' + digits.substring(3, 6);
+            if (digits.length > 6) res += '-' + digits.substring(6, 9);
+            return res;
+        },
+        pattern: /^\d{3}-\d{3}-\d{3}$/,
+        validate: (digits) => {
+            if (digits.length !== 9) return { valid: false, msgEn: 'Australia mobile number must be 9 digits (e.g., 412-345-678).', msgTh: 'เบอร์มือถือออสเตรเลียต้องมี 9 หลัก (เช่น 412-345-678)' };
+            if (/^(\d)\1{8}$/.test(digits)) return { valid: false, msgEn: 'Repeated dummy digits not allowed.', msgTh: 'ไม่อนุญาตให้ใช้ตัวเลขซ้ำกันทั้งหมด' };
+            if (digits[0] !== '4') return { valid: false, msgEn: 'Australia mobile numbers must start with 4 (from 04xx).', msgTh: 'เบอร์มือถือออสเตรเลียต้องขึ้นต้นด้วย 4 (จาก 04xx)' };
+            return { valid: true };
+        }
+    },
+    '+82': {
+        country: 'South Korea',
+        nameTh: 'เกาหลีใต้',
+        placeholder: 'e.g., 10-1234-5678',
+        placeholderTh: 'เช่น 10-1234-5678',
+        maxDigits: 10,
+        stripLeadingZero: true, // 010 drops leading 0 -> 10
+        maxlength: 12, // XX-XXXX-XXXX
+        format: (digits) => {
+            let res = '';
+            if (digits.length > 0) res += digits.substring(0, 2);
+            if (digits.length > 2) res += '-' + digits.substring(2, 6);
+            if (digits.length > 6) res += '-' + digits.substring(6, 10);
+            return res;
+        },
+        pattern: /^\d{2}-\d{4}-\d{4}$/,
+        validate: (digits) => {
+            if (digits.length !== 10) return { valid: false, msgEn: 'South Korea mobile number must be 10 digits (e.g., 10-1234-5678).', msgTh: 'เบอร์มือถือเกาหลีใต้ต้องมี 10 หลัก (เช่น 10-1234-5678)' };
+            if (/^(\d)\1{9}$/.test(digits)) return { valid: false, msgEn: 'Repeated dummy digits not allowed.', msgTh: 'ไม่อนุญาตให้ใช้ตัวเลขซ้ำกันทั้งหมด' };
+            if (digits.substring(0, 2) !== '10') return { valid: false, msgEn: 'South Korea mobile numbers must start with 10 (from 010).', msgTh: 'เบอร์มือถือเกาหลีใต้ต้องขึ้นต้นด้วย 10 (จาก 010)' };
+            return { valid: true };
+        }
+    }
+};
+
+// Helper: Format Phone Number According to Selected Country
+function formatPhoneNumber(val, countryCode = '+66') {
     if (!val) return '';
+    const rule = countryPhoneRules[countryCode] || countryPhoneRules['+66'];
     let nums = val.replace(/\D/g, '');
-    if (nums.startsWith('0')) {
+    if (rule.stripLeadingZero && nums.startsWith('0')) {
         nums = nums.substring(1);
     }
-    nums = nums.substring(0, 9); // exactly 9 digits after dropping leading 0
-    let formatted = '';
-    if (nums.length > 0) {
-        formatted = nums.substring(0, 2);
-    }
-    if (nums.length > 2) {
-        formatted += '-' + nums.substring(2, 5);
-    }
-    if (nums.length > 5) {
-        formatted += '-' + nums.substring(5, 9);
-    }
-    return formatted;
+    nums = nums.substring(0, rule.maxDigits);
+    return rule.format(nums);
 }
 
-// Strict Phone Number Validation Function
-// Enforces valid Thai mobile prefixes (06, 08, 09 -> 6, 8, 9), blocks repeated dummy digits (88-888-8888, 000000000), and sequential digits
+// Strict Phone Number Validation Function per Country
 function validatePhoneNumber(val, countryCode = '+66') {
     if (!val || val.trim() === '') {
         return { 
@@ -217,65 +375,52 @@ function validatePhoneNumber(val, countryCode = '+66') {
         };
     }
 
-    const rawDigits = val.replace(/\D/g, '');
-
-    // 1. Length check: Exactly 9 digits (since leading 0 is stripped for international format)
-    if (rawDigits.length !== 9) {
-        return { 
-            valid: false, 
-            error: 'length', 
-            messageEn: 'Phone number must be 9 digits (e.g., 63-416-9816).',
-            messageTh: 'เบอร์โทรศัพท์ต้องมี 9 หลัก (เช่น 63-416-9816)'
-        };
+    const rule = countryPhoneRules[countryCode] || countryPhoneRules['+66'];
+    let rawDigits = val.replace(/\D/g, '');
+    if (rule.stripLeadingZero && rawDigits.startsWith('0')) {
+        rawDigits = rawDigits.substring(1);
     }
+    rawDigits = rawDigits.substring(0, rule.maxDigits);
 
-    // 2. Dummy numbers check: Cannot be all identical digits (e.g., 88-888-8888, 00-000-0000, 11-111-1111)
-    if (/^(\d)\1{8}$/.test(rawDigits)) {
+    // Call country-specific validator
+    const check = rule.validate(rawDigits);
+    if (!check.valid) {
         return {
             valid: false,
-            error: 'repeated',
-            messageEn: 'Invalid phone number: Repeated dummy digits are not allowed (e.g., 88-888-8888).',
-            messageTh: 'เบอร์โทรศัพท์ไม่ถูกต้อง: ไม่อนุญาตให้ใช้ตัวเลขซ้ำกันทั้งหมด (เช่น 88-888-8888 หรือ 00-000-0000)'
+            error: 'country_rule',
+            messageEn: check.msgEn,
+            messageTh: check.msgTh
         };
     }
 
-    // 3. Sequential numbers check: Cannot be 12-345-6789 or 98-765-4321
-    if (rawDigits === '123456789' || rawDigits === '987654321') {
-        return {
-            valid: false,
-            error: 'sequential',
-            messageEn: 'Invalid phone number: Sequential dummy digits are not allowed.',
-            messageTh: 'เบอร์โทรศัพท์ไม่ถูกต้อง: ไม่อนุญาตให้ใช้ตัวเลขเรียงลำดับ (เช่น 12-345-6789)'
-        };
-    }
-
-    // 4. Format check: Must follow XX-XXX-XXXX
-    if (!/^\d{2}-\d{3}-\d{4}$/.test(val)) {
+    if (!rule.pattern.test(val)) {
         return {
             valid: false,
             error: 'format',
-            messageEn: 'Phone number must follow XX-XXX-XXXX format (e.g., 63-416-9816).',
-            messageTh: 'เบอร์โทรศัพท์ต้องอยู่ในรูปแบบ XX-XXX-XXXX (เช่น 63-416-9816)'
+            messageEn: `Phone number must follow ${rule.placeholder}.`,
+            messageTh: `เบอร์โทรศัพท์ต้องอยู่ในรูปแบบ ${rule.placeholderTh}`
         };
-    }
-
-    // 5. Thai Mobile Prefix check (When +66 is selected)
-    // Valid Thai mobile numbers start with 06, 08, 09 -> stripped leading 0 becomes 6, 8, 9
-    // Invalid prefixes like 11-111-1316 or 000000000 are rejected!
-    if (countryCode === '+66') {
-        const firstDigit = rawDigits[0];
-        if (!['6', '8', '9'].includes(firstDigit)) {
-            return {
-                valid: false,
-                error: 'prefix',
-                messageEn: 'Invalid Thai mobile prefix. Number must start with 6, 8, or 9 (e.g., 63-416-9816, 81-234-5678).',
-                messageTh: 'เบอร์โทรศัพท์ไทยไม่ถูกต้อง: หมวดเบอร์มือถือต้องขึ้นต้นด้วย 6, 8 หรือ 9 เท่านั้น (เช่น 63-416-9816 หรือ 81-234-5678)'
-            };
-        }
     }
 
     return { valid: true };
 }
+
+// Update Phone Input Placeholder and Maxlength when Country or Language Changes
+function updateCountryPhoneUI() {
+    const countrySelect = document.getElementById('countryCode');
+    const contactNumber = document.getElementById('contactNumber');
+    if (!countrySelect || !contactNumber) return;
+    const country = countrySelect.value;
+    const rule = countryPhoneRules[country] || countryPhoneRules['+66'];
+
+    contactNumber.placeholder = currentLanguage === 'th' ? rule.placeholderTh : rule.placeholder;
+    contactNumber.maxLength = rule.maxlength;
+
+    if (contactNumber.value) {
+        contactNumber.value = formatPhoneNumber(contactNumber.value, country);
+    }
+}
+
 
 
 // Dynamic Salary Limit Hint Update Function
@@ -341,6 +486,7 @@ window.setLanguage = function(lang) {
 
     // Update dynamic salary hint
     window.updateSalaryHint();
+    updateCountryPhoneUI();
 
     // Refresh readiness checklist in new language
     if (window.updateReadinessChecklist) {
@@ -533,9 +679,10 @@ document.addEventListener("DOMContentLoaded", () => {
         if (!contactNumber) return;
         const hintEl = document.getElementById('phoneErrorHint');
         const country = document.getElementById('countryCode')?.value || '+66';
+        const rule = countryPhoneRules[country] || countryPhoneRules['+66'];
         const val = contactNumber.value.trim();
 
-        if (val.length >= 11) {
+        if (val.length >= rule.maxlength) {
             const result = validatePhoneNumber(val, country);
             if (!result.valid && hintEl) {
                 hintEl.textContent = currentLanguage === 'th' ? `* ${result.messageTh}` : `* ${result.messageEn}`;
@@ -553,12 +700,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if (contactNumber) {
         contactNumber.addEventListener('input', function() {
-            this.value = formatPhoneNumber(this.value);
+            const country = document.getElementById('countryCode')?.value || '+66';
+            this.value = formatPhoneNumber(this.value, country);
             checkPhoneInputHint();
             window.updateReadinessChecklist();
         });
         contactNumber.addEventListener('blur', function() {
-            this.value = formatPhoneNumber(this.value);
+            const country = document.getElementById('countryCode')?.value || '+66';
+            this.value = formatPhoneNumber(this.value, country);
             checkPhoneInputHint();
             window.updateReadinessChecklist();
         });
@@ -567,10 +716,14 @@ document.addEventListener("DOMContentLoaded", () => {
     const countryCodeSelect = document.getElementById('countryCode');
     if (countryCodeSelect) {
         countryCodeSelect.addEventListener('change', () => {
+            updateCountryPhoneUI();
             checkPhoneInputHint();
             window.updateReadinessChecklist();
         });
     }
+
+    // Initial country phone UI setup
+    updateCountryPhoneUI();
 
     // 3. Format Applicant ID (Digits only, max 11)
     if (applicantId) {
@@ -1036,6 +1189,9 @@ window.autoFillForm = function() {
     if (firstName) firstName.value = 'AAAAAAAAAAAA';
     if (lastName) lastName.value = 'AAAAAA';
     if (email) email.value = 'oavatan@gmail.com';
+        const countrySelect = document.getElementById('countryCode');
+    if (countrySelect) countrySelect.value = '+66';
+    updateCountryPhoneUI();
     if (contactNumber) contactNumber.value = '63-416-9816'; // Formatted phone without leading 0
     if (dob) dob.value = '2002-08-21'; // Valid age ~24 (between 18 and 50)
 
@@ -1043,6 +1199,7 @@ window.autoFillForm = function() {
     if (experience) {
         experience.value = 'professional';
         if (window.updateSalaryHint) window.updateSalaryHint();
+    updateCountryPhoneUI();
     }
 
     // Role: Medic
