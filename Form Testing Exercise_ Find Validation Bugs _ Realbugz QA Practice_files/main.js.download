@@ -217,7 +217,7 @@ let currentLanguage = 'en';
 const EMAILJS_CONFIG = {
     publicKey: "pJxoR0jf2aj4qNih-",       // Connected EmailJS Public Key
     serviceId: "service_4aihlkj",       // Connected EmailJS Service ID
-    templateId: "template_knv4p6b"      // Connected EmailJS Template ID
+    templateId: "template_a69zhul"      // Connected EmailJS Template ID
 };
 
 let currentGeneratedOTP = null;
