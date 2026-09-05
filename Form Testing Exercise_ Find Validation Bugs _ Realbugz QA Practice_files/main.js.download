@@ -674,9 +674,10 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     });
 
-    // 7. Custom Interactive Purple & Gold Slider
+    // 7. Custom Interactive Purple & Gold Slider (Step of 5 Units)
     const minSalary = 700;
     const maxSalary = 2250;
+    const salaryStep = 5; // Drag step: 5 units per increment/decrement
     const salaryRangeHidden = document.getElementById('range');
     const rangeValueDisplay = document.getElementById('rangeValue');
     const sliderTrack = document.getElementById('custom-slider-track');
@@ -684,7 +685,9 @@ document.addEventListener("DOMContentLoaded", () => {
     const sliderThumb = document.getElementById('custom-slider-thumb');
 
     function updateSliderVisuals(salary) {
-        const clamped = Math.max(minSalary, Math.min(maxSalary, salary));
+        // Snap to nearest multiple of 5
+        const stepped = Math.round(salary / salaryStep) * salaryStep;
+        const clamped = Math.max(minSalary, Math.min(maxSalary, stepped));
         const percent = ((clamped - minSalary) / (maxSalary - minSalary)) * 100;
         
         if (salaryRangeHidden) salaryRangeHidden.value = clamped;
@@ -704,7 +707,10 @@ document.addEventListener("DOMContentLoaded", () => {
             const clientX = e.touches ? e.touches[0].clientX : e.clientX;
             let percent = (clientX - rect.left) / rect.width;
             percent = Math.max(0, Math.min(1, percent));
-            return Math.round(minSalary + percent * (maxSalary - minSalary));
+            const rawSalary = minSalary + percent * (maxSalary - minSalary);
+            // Calculate step of 5 units
+            const steppedSalary = Math.round(rawSalary / salaryStep) * salaryStep;
+            return Math.max(minSalary, Math.min(maxSalary, steppedSalary));
         }
 
         sliderTrack.addEventListener('mousedown', (e) => {
