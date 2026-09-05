@@ -740,6 +740,21 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
+
+    // Exact Milestone Mark Click Handlers: Snaps to exactly 900, 1125, 1550, 2250
+    document.querySelectorAll('.slider-mark').forEach(mark => {
+        function handleMarkClick(e) {
+            e.stopPropagation();
+            e.preventDefault();
+            const exactSalary = parseInt(mark.getAttribute('data-salary'), 10);
+            if (!isNaN(exactSalary)) {
+                updateSliderVisuals(exactSalary);
+            }
+        }
+        mark.addEventListener('click', handleMarkClick);
+        mark.addEventListener('touchend', handleMarkClick, { passive: false });
+    });
+
     // Initial slider position
     updateSliderVisuals(700);
 

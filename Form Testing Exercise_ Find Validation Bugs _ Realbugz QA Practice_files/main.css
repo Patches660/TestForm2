@@ -799,7 +799,9 @@ footer p {
     display: flex;
     flex-direction: column;
     align-items: center;
-    pointer-events: none;
+    pointer-events: auto !important;
+    cursor: pointer !important;
+    z-index: 10;
 }
 .mark-circle {
     width: 14px; /* Larger circles that bulge out of the track line */
@@ -821,27 +823,26 @@ footer p {
 .mark-label {
     font-size: 10px;
     font-weight: 700;
-    color: var(--primary-purple); /* Purple text labels */
-    margin-top: 16px; /* Push labels below track */
+    color: var(--primary-purple);
+    margin-top: 16px;
     white-space: nowrap;
     text-align: center;
-    transition: color 0.25s ease;
-    pointer-events: none;
+    transition: color 0.25s ease, transform 0.2s ease;
+    pointer-events: auto !important;
+    cursor: pointer !important;
+    user-select: none;
 }
 .slider-mark:hover .mark-label {
-    color: var(--accent-purple);
-}
-
-/* Star Pop Animation Styling */
-.star-pop {
-    position: absolute;
-    top: -22px;
-    font-size: 18px;
-    color: var(--bright-gold);
-    opacity: 0;
-    pointer-events: none;
-    transform: scale(0);
-    z-index: 12;
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--primary-purple);
+    margin-top: 16px;
+    white-space: nowrap;
+    text-align: center;
+    transition: color 0.25s ease, transform 0.2s ease;
+    pointer-events: auto !important;
+    cursor: pointer !important;
+    user-select: none;
 }
 .star-pop.animate {
     animation: starBounce 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
