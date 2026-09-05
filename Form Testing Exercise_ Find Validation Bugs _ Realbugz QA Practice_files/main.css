@@ -1311,35 +1311,42 @@ input.input-error {
     box-shadow: 0 0 6px rgba(231, 76, 60, 0.25) !important;
 }
 
-/* Email & OTP Verification Styles */
+/* Email & OTP Verification Styles - Precise Compact Button Width */
 .email-input-action-row {
-    display: flex;
-    gap: 10px;
-    align-items: center;
+    display: flex !important;
+    gap: 10px !important;
+    align-items: center !important;
+    width: 100% !important;
 }
 
 .email-input-action-row input[type="email"] {
-    flex: 1;
+    flex: 1 1 auto !important; /* Input takes 75-80% of space */
+    width: auto !important;
+    min-width: 0 !important;
 }
 
 .btn-send-otp {
+    flex: 0 0 auto !important; /* Do NOT stretch! Natural compact button size only */
+    width: auto !important;
+    min-width: 0 !important;
+    max-width: fit-content !important;
     background: linear-gradient(135deg, #7B2CBF, #5A189A);
     color: #FFFFFF;
     border: 1px solid rgba(212, 175, 55, 0.4);
-    padding: 4px 10px !important;
-    font-size: 11px !important;
-    font-weight: 600 !important;
+    padding: 10px 18px !important;
+    font-size: 13px !important;
+    font-weight: 700 !important;
     border-radius: 6px !important;
     cursor: pointer;
-    white-space: nowrap;
+    white-space: nowrap !important;
+    text-transform: none !important; /* Preserves 'Send Code' */
+    letter-spacing: normal !important;
     transition: all 0.25s ease;
-    box-shadow: 0 1px 4px rgba(90, 24, 154, 0.2);
-    height: 34px !important;
-    min-width: 58px !important;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
+    box-shadow: 0 2px 6px rgba(90, 24, 154, 0.25);
+    height: 44px !important; /* Perfectly matches input height */
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
 }
 
 .btn-send-otp:hover:not(:disabled) {
@@ -1383,38 +1390,46 @@ input.input-error {
 }
 
 .otp-input-action-row {
-    display: flex;
-    gap: 10px;
-    align-items: center;
+    display: flex !important;
+    gap: 10px !important;
+    align-items: center !important;
+    width: 100% !important;
 }
 
 .otp-input-action-row input {
-    flex: 1;
+    flex: 1 1 auto !important;
+    width: auto !important;
+    min-width: 0 !important;
     font-size: 16px;
     font-weight: 700;
     letter-spacing: 3px;
     text-align: center;
     padding: 9px 12px;
+    height: 44px !important;
 }
 
 .btn-verify-otp {
+    flex: 0 0 auto !important; /* Do NOT stretch! */
+    width: auto !important;
+    min-width: 0 !important;
+    max-width: fit-content !important;
     background: linear-gradient(135deg, #27AE60, #2ECC71);
     color: #FFFFFF;
     border: none;
-    padding: 4px 12px !important;
-    font-size: 11px !important;
-    font-weight: 600 !important;
+    padding: 10px 18px !important;
+    font-size: 13px !important;
+    font-weight: 700 !important;
     border-radius: 6px !important;
     cursor: pointer;
-    white-space: nowrap;
+    white-space: nowrap !important;
+    text-transform: none !important;
+    letter-spacing: normal !important;
     transition: all 0.25s ease;
-    box-shadow: 0 1px 4px rgba(39, 174, 96, 0.2);
-    height: 34px !important;
-    min-width: 58px !important;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
+    box-shadow: 0 2px 6px rgba(39, 174, 96, 0.25);
+    height: 44px !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
 }
 
 .btn-verify-otp:hover {

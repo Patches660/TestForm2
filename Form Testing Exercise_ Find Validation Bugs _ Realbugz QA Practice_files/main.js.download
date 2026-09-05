@@ -63,8 +63,8 @@ const i18n = {
         "chk-fname": "First Name (5+ letters)",
         "chk-lname": "Last Name (5+ letters)",
                 // OTP Email Verification EN
-        "btn-send-otp": "Send",
-        "btn-verify-otp": "Verify",
+        "btn-send-otp": "Send Code",
+        "btn-verify-otp": "Verify Code",
         "otp-enter-desc": "Enter the 6-digit code sent to your email:",
         "email-verified-success": "Email Verified Successfully",
         "otp-sent-alert": "Verification code has been sent to your email! (Valid for 5 minutes)",
@@ -163,8 +163,8 @@ const i18n = {
         "chk-fname": "ชื่อ (5 ตัวขึ้นไป)",
         "chk-lname": "นามสกุล (5 ตัวขึ้นไป)",
                 // OTP Email Verification TH
-        "btn-send-otp": "ส่งรหัส",
-        "btn-verify-otp": "ยืนยัน",
+        "btn-send-otp": "ส่งรหัสยืนยัน",
+        "btn-verify-otp": "ยืนยันรหัส",
         "otp-enter-desc": "กรอกรหัส 6 หลักที่ได้รับทางอีเมลของคุณ:",
         "email-verified-success": "ยืนยันอีเมลสำเร็จแล้ว",
         "otp-sent-alert": "ส่งรหัสยืนยันไปยังอีเมลของคุณเรียบร้อยแล้ว! (รหัสมีอายุ 5 นาที)",
@@ -941,7 +941,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 if (otpStatusHint) otpStatusHint.style.display = 'none';
                 if (btnSendOtp) {
                     btnSendOtp.disabled = false;
-                    btnSendOtp.textContent = currentLanguage === 'th' ? "ส่งรหัส" : "Send";
+                    btnSendOtp.textContent = currentLanguage === 'th' ? "ส่งรหัสยืนยัน" : "Send Code";
                 }
                 clearInterval(otpCountdownTimer);
                 if (otpCountdown) otpCountdown.textContent = '';
@@ -972,13 +972,13 @@ document.addEventListener("DOMContentLoaded", () => {
             // Disable button and start 60s cooldown
             btnSendOtp.disabled = true;
             let cooldown = 60;
-            btnSendOtp.textContent = `${cooldown}s`;
+            btnSendOtp.textContent = currentLanguage === 'th' ? `รอ ${cooldown}s` : `Wait ${cooldown}s`;
 
             if (otpCountdownTimer) clearInterval(otpCountdownTimer);
             otpCountdownTimer = setInterval(() => {
                 cooldown--;
                 if (cooldown > 0) {
-                    btnSendOtp.textContent = `${cooldown}s`;
+                    btnSendOtp.textContent = currentLanguage === 'th' ? `รอ ${cooldown}s` : `Wait ${cooldown}s`;
                     if (otpCountdown) {
                         const mins = Math.floor((otpExpiresAt - Date.now()) / 60000);
                         const secs = Math.floor(((otpExpiresAt - Date.now()) % 60000) / 1000);
@@ -993,7 +993,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 } else {
                     clearInterval(otpCountdownTimer);
                     btnSendOtp.disabled = false;
-                    btnSendOtp.textContent = currentLanguage === 'th' ? "ส่งรหัส" : "Send";
+                    btnSendOtp.textContent = currentLanguage === 'th' ? "ส่งรหัสยืนยัน" : "Send Code";
                 }
             }, 1000);
 
