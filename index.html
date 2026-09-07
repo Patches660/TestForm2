@@ -136,8 +136,29 @@
                     </div>
 
                     <div class="form-group">
-                        <label for="dob" data-i18n="label-dob">Date of Birth*</label>
-                        <input type="date" id="dob" name="dob" required>
+                        <label data-i18n="label-dob">Date of Birth (Age 18-50)*</label>
+                        <div class="dob-split-container">
+                            <div class="dob-field-col">
+                                <label class="dob-sublabel" for="dobDay" data-i18n="dob-day-label">Day</label>
+                                <select id="dobDay" name="dobDay" required class="dob-select">
+                                    <option value="" data-i18n="dob-select-day">-- Day --</option>
+                                </select>
+                            </div>
+                            <div class="dob-field-col">
+                                <label class="dob-sublabel" for="dobMonth" data-i18n="dob-month-label">Month</label>
+                                <select id="dobMonth" name="dobMonth" required class="dob-select">
+                                    <option value="" data-i18n="dob-select-month">-- Month --</option>
+                                </select>
+                            </div>
+                            <div class="dob-field-col">
+                                <label class="dob-sublabel" for="dobYear" data-i18n="dob-year-label">Year</label>
+                                <select id="dobYear" name="dobYear" required class="dob-select">
+                                    <option value="" data-i18n="dob-select-year">-- Year --</option>
+                                </select>
+                            </div>
+                        </div>
+                        <input type="hidden" id="dob" name="dob" required>
+                        <div id="dobFeedback" class="dob-feedback"></div>
                     </div>
 
                     <div class="form-group">
@@ -251,10 +272,7 @@
                         <select id="contactMethod" name="contactMethod">
                             <option value="Email" data-i18n="method-email">Email</option>
                             <option value="Phone" data-i18n="method-phone">Phone</option>
-                            <option value="WhatsApp" data-i18n="method-wa">WhatsApp</option>
-                            <option value="Telegram" data-i18n="method-tg">Telegram</option>
                         </select>
-                        <div id="salaryLimitHint" class="salary-limit-hint"></div>
                     </div>
 
                     <div class="form-group">

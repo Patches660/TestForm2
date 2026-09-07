@@ -1481,3 +1481,92 @@ input.input-error {
     line-height: 1.5;
     margin-top: 8px;
 }
+
+
+/* =======================================================
+   Date of Birth Split Container (Day, Month, Year) & Age
+   ======================================================= */
+.dob-split-container {
+    display: flex;
+    gap: 12px;
+    width: 100%;
+}
+
+.dob-field-col {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.dob-sublabel {
+    font-size: 11.5px;
+    font-weight: 700;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.dob-select {
+    width: 100%;
+    padding: 11px 12px;
+    border: 1.5px solid var(--border-light);
+    border-radius: 6px;
+    background: #FAF8FC;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    color: var(--text-dark);
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+.dob-select:focus {
+    outline: none;
+    border-color: var(--accent-purple);
+    background: #FFFFFF;
+    box-shadow: 0 0 8px rgba(212, 175, 55, 0.35);
+}
+
+.dob-select.input-error {
+    border-color: #E74C3C !important;
+    background-color: #FDEDEC !important;
+}
+
+.dob-select.input-success {
+    border-color: #27AE60 !important;
+    background-color: #EAFAF1 !important;
+}
+
+.dob-feedback {
+    margin-top: 6px;
+    font-size: 12.5px;
+    font-weight: 600;
+    line-height: 1.4;
+    display: none;
+    padding: 6px 10px;
+    border-radius: 6px;
+    transition: all 0.3s ease;
+}
+
+.dob-feedback.visible {
+    display: block;
+}
+
+.dob-feedback.error {
+    background: #FDEDEC;
+    color: #C0392B;
+    border: 1px solid rgba(231, 76, 60, 0.3);
+}
+
+.dob-feedback.success {
+    background: #EAFAF1;
+    color: #196F3D;
+    border: 1px solid rgba(39, 174, 96, 0.3);
+}
+
+@media (max-width: 576px) {
+    .dob-split-container {
+        flex-direction: column;
+        gap: 8px;
+    }
+}
