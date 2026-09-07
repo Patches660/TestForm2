@@ -1125,14 +1125,6 @@ const checklistDefinitions = [
         }
     },
     {
-        id: 'chk-passport',
-        fieldId: 'passport',
-        validate: () => {
-            const input = document.getElementById('passport');
-            return input && input.files && input.files.length > 0;
-        }
-    },
-    {
         id: 'chk-terms',
         fieldId: 'terms',
         validate: () => {
@@ -2047,24 +2039,27 @@ window.autoFillForm = function() {
         terms.checked = true;
     }
 
-    // Attach mock Passport/ID file so submission validation passes cleanly!
+    // Leave Passport/ID input empty so the user can upload their own file and test validation!
     if (passport) {
-        try {
-            const dt = new DataTransfer();
-            const dummyFile = new File(["Eldoria Expedition ID Verification"], "passport_sample.png", { type: "image/png" });
-            dt.items.add(dummyFile);
-            passport.files = dt.files;
-            isPassportVerified = true;
-            showPassportSuccessUI("✓ ตรวจสอบสำเร็จ: เป็นเอกสาร Passport ที่ถูกต้องตามมาตรฐาน ICAO 9303", "✓ Verified: Valid Passport document according to ICAO 9303 standards.");
-        } catch (e) {
-            isPassportVerified = true;
+        passport.value = '';
+        isPassportVerified = false;
+        lastPassportStatus = null;
+        lastPassportMsgTh = '';
+        lastPassportMsgEn = '';
+        const feedbackEl = document.getElementById('passportFeedback');
+        const dlBox = document.getElementById('passportDownloadBox');
+        if (feedbackEl) {
+            feedbackEl.className = 'passport-feedback';
+            feedbackEl.textContent = '';
         }
+        if (dlBox) dlBox.style.display = 'none';
+        passport.classList.remove('input-error', 'input-success');
     }
 
-    // Update readiness checklist to 100%
+    // Update readiness checklist
     if (window.updateReadinessChecklist) {
         window.updateReadinessChecklist();
     }
 
-    console.log("Auto-fill applied successfully! All fields filled and valid for TestForm2.");
+    console.log("Auto-fill applied successfully! All fields filled except Passport (left blank for manual testing).");
 };
