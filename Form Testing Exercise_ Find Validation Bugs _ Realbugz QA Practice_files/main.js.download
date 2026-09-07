@@ -305,182 +305,71 @@ function calculateAge(birthDateStr) {
     return age;
 }
 
-// Month Names Data for Dropdown & Summary
-const dobMonthNames = {
-    en: [
-        "January (01)", "February (02)", "March (03)", "April (04)",
-        "May (05)", "June (06)", "July (07)", "August (08)",
-        "September (09)", "October (10)", "November (11)", "December (12)"
-    ],
-    th: [
-        "มกราคม (01)", "กุมภาพันธ์ (02)", "มีนาคม (03)", "เมษายน (04)",
-        "พฤษภาคม (05)", "มิถุนายน (06)", "กรกฎาคม (07)", "สิงหาคม (08)",
-        "กันยายน (09)", "ตุลาคม (10)", "พฤศจิกายน (11)", "ธันวาคม (12)"
-    ]
-};
 
-const dobMonthNamesPure = {
-    en: ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"],
-    th: ["มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน", "พฤษภาคม", "มิถุนายน", "กรกฎาคม", "สิงหาคม", "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม"]
-};
+// Real-time Date of Birth & Age 18-50 Validation & Display
+function checkDOBRealTime(showFeedback = true) {
+    const dob = document.getElementById("dob");
+    const feedbackEl = document.getElementById("dobFeedback");
+    if (!dob) return { valid: false, reason: 'missing' };
 
-// Days in month helper (accounts for leap years)
-function getDaysInMonth(year, month) {
-    if (!month) return 31;
-    const y = year || 2024;
-    return new Date(y, month, 0).getDate();
-}
-
-// Update Days dropdown based on selected month & year
-function updateDOBDaysDropdown() {
-    const dobDay = document.getElementById('dobDay');
-    const dobMonth = document.getElementById('dobMonth');
-    const dobYear = document.getElementById('dobYear');
-    if (!dobDay) return;
-
-    const curVal = parseInt(dobDay.value, 10);
-    const monthVal = parseInt(dobMonth?.value, 10);
-    const yearVal = parseInt(dobYear?.value, 10);
-    const maxDays = getDaysInMonth(yearVal, monthVal);
-
-    const placeholderText = currentLanguage === 'th' ? '-- วัน --' : '-- Day --';
-    dobDay.innerHTML = `<option value="">${placeholderText}</option>`;
-    for (let d = 1; d <= maxDays; d++) {
-        const opt = document.createElement('option');
-        opt.value = d.toString();
-        opt.textContent = d < 10 ? `0${d}` : `${d}`;
-        if (curVal === d) opt.selected = true;
-        dobDay.appendChild(opt);
-    }
-}
-
-// Update Months dropdown with localized names
-function updateDOBMonthsDropdown() {
-    const dobMonth = document.getElementById('dobMonth');
-    if (!dobMonth) return;
-    const curVal = dobMonth.value;
-    const placeholderText = currentLanguage === 'th' ? '-- เดือน --' : '-- Month --';
-    dobMonth.innerHTML = `<option value="">${placeholderText}</option>`;
-    const list = dobMonthNames[currentLanguage] || dobMonthNames['en'];
-    list.forEach((name, idx) => {
-        const opt = document.createElement('option');
-        opt.value = (idx + 1).toString();
-        opt.textContent = name;
-        if (curVal === (idx + 1).toString()) opt.selected = true;
-        dobMonth.appendChild(opt);
-    });
-}
-
-// Update Years dropdown (covers testing range from 14 years old to 65 years old)
-function updateDOBYearsDropdown() {
-    const dobYear = document.getElementById('dobYear');
-    if (!dobYear) return;
-    const curVal = dobYear.value;
-    const placeholderText = currentLanguage === 'th' ? '-- ปี (ค.ศ.) --' : '-- Year --';
-    dobYear.innerHTML = `<option value="">${placeholderText}</option>`;
-    const thisYear = new Date().getFullYear();
-    for (let y = thisYear - 14; y >= thisYear - 65; y--) {
-        const opt = document.createElement('option');
-        opt.value = y.toString();
-        opt.textContent = y.toString();
-        if (curVal === y.toString()) opt.selected = true;
-        dobYear.appendChild(opt);
-    }
-}
-
-// Validate Day, Month, Year and check Age 18-50
-function validateDOB(showFeedback = true) {
-    const dobDay = document.getElementById('dobDay');
-    const dobMonth = document.getElementById('dobMonth');
-    const dobYear = document.getElementById('dobYear');
-    const dobHidden = document.getElementById('dob');
-    const feedbackEl = document.getElementById('dobFeedback');
-    
-    if (!dobDay || !dobMonth || !dobYear) return { valid: false, reason: 'missing' };
-
-    const day = parseInt(dobDay.value, 10);
-    const month = parseInt(dobMonth.value, 10);
-    const year = parseInt(dobYear.value, 10);
-
-    const selects = [dobDay, dobMonth, dobYear];
-
-    if (!day || !month || !year) {
-        if (dobHidden) dobHidden.value = '';
-        selects.forEach(s => s.classList.remove('input-error', 'input-success'));
+    const val = dob.value;
+    if (!val) {
+        dob.classList.remove('input-error', 'input-success');
         if (feedbackEl) {
             feedbackEl.className = 'dob-feedback';
             feedbackEl.textContent = '';
         }
-        return { valid: false, reason: 'incomplete' };
+        return { valid: false, reason: 'empty' };
     }
 
-    const dateStr = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-    if (dobHidden) dobHidden.value = dateStr;
+    const age = calculateAge(val);
 
-    const age = calculateAge(dateStr);
+    if (age < 0) {
+        dob.classList.remove('input-success');
+        dob.classList.add('input-error');
+        if (feedbackEl && showFeedback) {
+            feedbackEl.className = 'dob-feedback visible error';
+            feedbackEl.textContent = currentLanguage === 'th'
+                ? "* รูปแบบวันที่ไม่ถูกต้อง"
+                : "* Invalid date format.";
+        }
+        return { valid: false, reason: 'invalid_date' };
+    }
 
     if (age < 18) {
-        selects.forEach(s => {
-            s.classList.add('input-error');
-            s.classList.remove('input-success');
-        });
+        dob.classList.remove('input-success');
+        dob.classList.add('input-error');
         if (feedbackEl && showFeedback) {
             feedbackEl.className = 'dob-feedback visible error';
             feedbackEl.textContent = currentLanguage === 'th'
                 ? `* ผู้สมัครต้องมีอายุอย่างน้อย 18 ปีขึ้นไป (ปัจจุบันอายุ ${age} ปี ไม่ผ่านเกณฑ์)`
                 : `* Applicant must be at least 18 years old (Current age: ${age} - ineligible).`;
         }
-        return { valid: false, reason: 'too_young', age, dateStr };
+        return { valid: false, reason: 'too_young', age };
     }
 
     if (age > 50) {
-        selects.forEach(s => {
-            s.classList.add('input-error');
-            s.classList.remove('input-success');
-        });
+        dob.classList.remove('input-success');
+        dob.classList.add('input-error');
         if (feedbackEl && showFeedback) {
             feedbackEl.className = 'dob-feedback visible error';
             feedbackEl.textContent = currentLanguage === 'th'
                 ? `* ผู้สมัครต้องมีอายุไม่เกิน 50 ปี (ปัจจุบันอายุ ${age} ปี เกินเกณฑ์ที่กำหนด)`
                 : `* Applicant must not exceed 50 years old (Current age: ${age} - exceeds limit).`;
         }
-        return { valid: false, reason: 'too_old', age, dateStr };
+        return { valid: false, reason: 'too_old', age };
     }
 
     // Valid: 18 - 50 years old
-    selects.forEach(s => {
-        s.classList.remove('input-error');
-        s.classList.add('input-success');
-    });
+    dob.classList.remove('input-error');
+    dob.classList.add('input-success');
     if (feedbackEl && showFeedback) {
         feedbackEl.className = 'dob-feedback visible success';
         feedbackEl.textContent = currentLanguage === 'th'
             ? `✓ อายุ ${age} ปี (ผ่านเกณฑ์อายุ 18-50 ปี สำหรับการเดินทางสำรวจ)`
             : `✓ Age: ${age} years old (Eligible 18-50 for expedition).`;
     }
-    return { valid: true, age, dateStr };
-}
-
-function initDOBDropdowns() {
-    updateDOBYearsDropdown();
-    updateDOBMonthsDropdown();
-    updateDOBDaysDropdown();
-
-    const dobDay = document.getElementById('dobDay');
-    const dobMonth = document.getElementById('dobMonth');
-    const dobYear = document.getElementById('dobYear');
-
-    function handleDOBChange() {
-        updateDOBDaysDropdown();
-        validateDOB(true);
-        if (window.updateReadinessChecklist) {
-            window.updateReadinessChecklist();
-        }
-    }
-
-    if (dobMonth) dobMonth.addEventListener('change', handleDOBChange);
-    if (dobYear) dobYear.addEventListener('change', handleDOBChange);
-    if (dobDay) dobDay.addEventListener('change', handleDOBChange);
+    return { valid: true, age };
 }
 
 
@@ -801,17 +690,8 @@ window.setLanguage = function(lang) {
     window.updateSalaryHint();
     updateCountryPhoneUI();
 
-    // Refresh DOB Dropdowns in new language
-    updateDOBMonthsDropdown();
-    const dobDayEl = document.getElementById('dobDay');
-    const dobYearEl = document.getElementById('dobYear');
-    if (dobDayEl && dobDayEl.options[0]) {
-        dobDayEl.options[0].textContent = lang === 'th' ? '-- วัน --' : '-- Day --';
-    }
-    if (dobYearEl && dobYearEl.options[0]) {
-        dobYearEl.options[0].textContent = lang === 'th' ? '-- ปี (ค.ศ.) --' : '-- Year --';
-    }
-    validateDOB(true);
+    // Refresh DOB feedback in new language
+    checkDOBRealTime(true);
 
     // Refresh readiness checklist in new language
     if (window.updateReadinessChecklist) {
@@ -875,9 +755,9 @@ const checklistDefinitions = [
     },
     {
         id: 'chk-dob',
-        fieldId: 'dobDay',
+        fieldId: 'dob',
         validate: () => {
-            const res = validateDOB(false);
+            const res = checkDOBRealTime(false);
             return res.valid === true;
         }
     },
@@ -990,8 +870,17 @@ document.addEventListener("DOMContentLoaded", () => {
     const comments = document.getElementById("comments");
     const terms = document.getElementById("terms");
 
-    // 1. Initialize Date of Birth (Day, Month, Year) & Age 18-50 Logic
-    initDOBDropdowns();
+    // 1. Initialize Date of Birth Real-time Age Feedback
+    if (dob) {
+        dob.addEventListener('input', () => {
+            checkDOBRealTime(true);
+            if (window.updateReadinessChecklist) window.updateReadinessChecklist();
+        });
+        dob.addEventListener('change', () => {
+            checkDOBRealTime(true);
+            if (window.updateReadinessChecklist) window.updateReadinessChecklist();
+        });
+    }
 
     // 2. Format Contact Number automatically & Validate in Real-time
     function checkPhoneInputHint() {
@@ -1481,24 +1370,22 @@ document.addEventListener("DOMContentLoaded", () => {
             }
 
             // E. Date of Birth: 18 to 50 years old
-            const dobCheck = validateDOB(true);
+            const dobCheck = checkDOBRealTime(true);
             if (!dobCheck.valid) {
-                if (dobCheck.reason === 'incomplete') {
+                if (dobCheck.reason === 'empty') {
                     alert(currentLanguage === 'th' 
-                        ? "กรุณาเลือกวัน เดือน และปีเกิด (อายุ 18-50 ปี) ให้ครบถ้วน" 
-                        : "Please select your complete Date of Birth (Day, Month, Year: 18-50 years).");
-                    document.getElementById('dobDay')?.focus();
+                        ? "กรุณาระบุวันเดือนปีเกิด (อายุ 18-50 ปี)" 
+                        : "Please select your Date of Birth (Age 18-50).");
                 } else if (dobCheck.reason === 'too_young') {
                     alert(currentLanguage === 'th' 
                         ? `ผู้สมัครต้องมีอายุอย่างน้อย 18 ปีขึ้นไป (ปัจจุบันอายุ ${dobCheck.age} ปี)` 
                         : `Applicant must be at least 18 years old to register (Current age: ${dobCheck.age}).`);
-                    document.getElementById('dobYear')?.focus();
                 } else if (dobCheck.reason === 'too_old') {
                     alert(currentLanguage === 'th' 
                         ? `ผู้สมัครต้องมีอายุไม่เกิน 50 ปี (ปัจจุบันอายุ ${dobCheck.age} ปี)` 
                         : `Applicant must not exceed 50 years old to register (Current age: ${dobCheck.age}).`);
-                    document.getElementById('dobYear')?.focus();
                 }
+                dob.focus();
                 return;
             }
             const age = dobCheck.age;
@@ -1586,12 +1473,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 const phoneDisplay = `${countryCode} ${phoneVal}`;
                 
                 // 5. Date of Birth & Age
-                const mIndex = parseInt(document.getElementById('dobMonth')?.value, 10) - 1;
-                const dVal = document.getElementById('dobDay')?.value;
-                const yVal = document.getElementById('dobYear')?.value;
-                const mName = (mIndex >= 0 && mIndex < 12) ? dobMonthNamesPure[lang][mIndex] : '';
-                const dobFormatted = (dVal && mName && yVal) ? `${dVal} ${mName} ${yVal}` : (dob?.value || '');
-                const dobDisplay = `${dobFormatted} (${age} ${lang === 'th' ? 'ปี' : 'years old'})`;
+                const dobVal = dob?.value || '';
+                const dobDisplay = `${dobVal} (${age} ${lang === 'th' ? 'ปี' : 'years old'})`;
                 
                 // 6. Archaeology Experience Label
                 const expSelect = document.getElementById('experience');
@@ -1717,16 +1600,10 @@ window.autoFillForm = function() {
     if (countrySelect) countrySelect.value = '+66';
     updateCountryPhoneUI();
     if (contactNumber) contactNumber.value = '63-416-9816'; // Formatted phone without leading 0
-        const dobYear = document.getElementById('dobYear');
-    const dobMonth = document.getElementById('dobMonth');
-    const dobDay = document.getElementById('dobDay');
-    if (dobYear) dobYear.value = '2002';
-    if (dobMonth) {
-        dobMonth.value = '8';
-        updateDOBDaysDropdown();
+        if (dob) {
+        dob.value = '2002-08-21';
+        checkDOBRealTime(true);
     }
-    if (dobDay) dobDay.value = '21';
-    validateDOB(true);
 
     // Experience: Professional
     if (experience) {
