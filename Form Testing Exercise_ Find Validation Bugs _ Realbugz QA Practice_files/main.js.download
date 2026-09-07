@@ -382,10 +382,50 @@ function checkDOBRealTime(showFeedback = true) {
     return { valid: true, age };
 }
 
+// Helper: Validate First Name & Last Name (>= 5 letters, English must start with uppercase)
+function validateName(val, fieldName = 'firstName') {
+    if (!val || val.length === 0) {
+        return { 
+            valid: false, 
+            reason: 'empty',
+            msgTh: fieldName === 'firstName' ? "โปรดระบุชื่อ (First Name)" : "โปรดระบุนามสกุล (Last Name)",
+            msgEn: fieldName === 'firstName' ? "Please enter your First Name." : "Please enter your Last Name."
+        };
+    }
+    
+    // Check basic pattern: letters only, at least 5 chars
+    const validCharsPattern = /^[a-zA-Z\u0E00-\u0E7F]{5,}$/;
+    if (!validCharsPattern.test(val)) {
+        return { 
+            valid: false, 
+            reason: 'format_or_length',
+            msgTh: fieldName === 'firstName' 
+                ? "ชื่อต้องประกอบด้วยตัวอักษรอย่างน้อย 5 ตัวขึ้นไป และห้ามมีตัวเลขหรืออักขระพิเศษ"
+                : "นามสกุลต้องประกอบด้วยตัวอักษรอย่างน้อย 5 ตัวขึ้นไป และห้ามมีตัวเลขหรืออักขระพิเศษ",
+            msgEn: fieldName === 'firstName'
+                ? "First Name must contain at least 5 letters and cannot have numbers or special characters."
+                : "Last Name must contain at least 5 letters and cannot have numbers or special characters."
+        };
+    }
 
+    // If English, first letter must be uppercase
+    if (/[a-zA-Z]/.test(val)) {
+        if (!/^[A-Z]/.test(val)) {
+            return {
+                valid: false,
+                reason: 'not_capitalized',
+                msgTh: fieldName === 'firstName'
+                    ? "หากระบุชื่อเป็นภาษาอังกฤษ ตัวอักษรตัวแรกต้องเป็นตัวพิมพ์ใหญ่ (เช่น Peter, Sanciter)"
+                    : "หากระบุนามสกุลเป็นภาษาอังกฤษ ตัวอักษรตัวแรกต้องเป็นตัวพิมพ์ใหญ่ (เช่น Ford, Forder)",
+                msgEn: fieldName === 'firstName'
+                    ? "If using English for First Name, the first letter must be capitalized (e.g., Peter, Sanciter)."
+                    : "If using English for Last Name, the first letter must be capitalized (e.g., Ford, Forder)."
+            };
+        }
+    }
 
-
-// =======================================================
+    return { valid: true };
+}
 // Passport OCR Verification & Dynamic Sample Downloads
 // =======================================================
 // Passport Verification State & Helpers
@@ -1041,7 +1081,7 @@ const checklistDefinitions = [
         fieldId: 'firstName',
         validate: () => {
             const val = (document.getElementById('firstName')?.value || '').trim();
-            return /^[a-zA-Z\u0E00-\u0E7F]{5,}$/.test(val);
+            return validateName(val, 'firstName').valid;
         }
     },
     {
@@ -1049,7 +1089,7 @@ const checklistDefinitions = [
         fieldId: 'lastName',
         validate: () => {
             const val = (document.getElementById('lastName')?.value || '').trim();
-            return /^[a-zA-Z\u0E00-\u0E7F]{5,}$/.test(val);
+            return validateName(val, 'lastName').valid;
         }
     },
     {
@@ -1644,23 +1684,20 @@ document.addEventListener("DOMContentLoaded", () => {
                 return;
             }
 
-            // B. First Name & Last Name (>= 5 letters, no numbers/special symbols)
-            const namePattern = /^[a-zA-Z\u0E00-\u0E7F]{5,}$/;
+            // B. First Name & Last Name (>= 5 letters, English must start with uppercase)
             const fNameVal = (firstName?.value || '').trim();
             const lNameVal = (lastName?.value || '').trim();
 
-            if (!namePattern.test(fNameVal)) {
-                alert(currentLanguage === 'th' 
-                    ? "ชื่อต้องประกอบด้วยตัวอักษรอย่างน้อย 5 ตัวขึ้นไป และห้ามมีตัวเลขหรืออักขระพิเศษ" 
-                    : "First Name must contain at least 5 letters and cannot have numbers or special characters.");
+            const fNameCheck = validateName(fNameVal, 'firstName');
+            if (!fNameCheck.valid) {
+                alert(currentLanguage === 'th' ? fNameCheck.msgTh : fNameCheck.msgEn);
                 firstName.focus();
                 return;
             }
 
-            if (!namePattern.test(lNameVal)) {
-                alert(currentLanguage === 'th' 
-                    ? "นามสกุลต้องประกอบด้วยตัวอักษรอย่างน้อย 5 ตัวขึ้นไป และห้ามมีตัวเลขหรืออักขระพิเศษ" 
-                    : "Last Name must contain at least 5 letters and cannot have numbers or special characters.");
+            const lNameCheck = validateName(lNameVal, 'lastName');
+            if (!lNameCheck.valid) {
+                alert(currentLanguage === 'th' ? lNameCheck.msgTh : lNameCheck.msgEn);
                 lastName.focus();
                 return;
             }
