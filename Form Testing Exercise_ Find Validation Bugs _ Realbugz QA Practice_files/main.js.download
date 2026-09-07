@@ -402,14 +402,20 @@ function showPassportScanningUI() {
     if (passportInput) passportInput.classList.remove('input-error', 'input-success');
 }
 
-function showPassportSuccessUI(msg) {
+function showPassportSuccessUI(msgTh, msgEn) {
     const feedbackEl = document.getElementById('passportFeedback');
     const dlBox = document.getElementById('passportDownloadBox');
     const passportInput = document.getElementById('passport');
 
+    const primaryMsg = currentLanguage === 'th' ? msgTh : msgEn;
+    const secondaryMsg = currentLanguage === 'th' ? msgEn : msgTh;
+
     if (feedbackEl) {
         feedbackEl.className = 'passport-feedback visible success';
-        feedbackEl.textContent = msg;
+        feedbackEl.innerHTML = `
+            <div>${primaryMsg}</div>
+            <span class="passport-sub-text">(${secondaryMsg})</span>
+        `;
     }
     if (dlBox) dlBox.style.display = 'none';
     if (passportInput) {
@@ -419,14 +425,20 @@ function showPassportSuccessUI(msg) {
     if (window.updateReadinessChecklist) window.updateReadinessChecklist();
 }
 
-function showPassportErrorUI(msg) {
+function showPassportErrorUI(msgTh, msgEn) {
     const feedbackEl = document.getElementById('passportFeedback');
     const dlBox = document.getElementById('passportDownloadBox');
     const passportInput = document.getElementById('passport');
 
+    const primaryMsg = currentLanguage === 'th' ? msgTh : msgEn;
+    const secondaryMsg = currentLanguage === 'th' ? msgEn : msgTh;
+
     if (feedbackEl) {
         feedbackEl.className = 'passport-feedback visible error';
-        feedbackEl.textContent = msg;
+        feedbackEl.innerHTML = `
+            <div>${primaryMsg}</div>
+            <span class="passport-sub-text">${secondaryMsg}</span>
+        `;
     }
     if (dlBox) dlBox.style.display = 'block';
     if (passportInput) {
@@ -458,9 +470,7 @@ async function verifyPassportDocument(file) {
     // 1. Instant pass for test sample files
     if (fname.includes('passport_sample') || fname.includes('passport_template') || fname.includes('passport_id_verification')) {
         isPassportVerified = true;
-        showPassportSuccessUI(currentLanguage === 'th'
-            ? "✓ ตรวจสอบสำเร็จ: เป็นเอกสาร Passport ที่ถูกต้องตามมาตรฐาน ICAO 9303"
-            : "✓ Verified: Valid Passport document according to ICAO 9303 standards.");
+        showPassportSuccessUI("✓ ตรวจสอบสำเร็จ: เป็นเอกสาร Passport ที่ถูกต้องตามมาตรฐาน ICAO 9303", "✓ Verified: Valid Passport document according to ICAO 9303 standards.");
         return { valid: true };
     }
 
@@ -471,9 +481,7 @@ async function verifyPassportDocument(file) {
 
     if (!isImage && !isPdf) {
         isPassportVerified = false;
-        showPassportErrorUI(currentLanguage === 'th'
-            ? "❌ ชนิดไฟล์ไม่ถูกต้อง: รองรับเฉพาะไฟล์รูปภาพ (JPG, PNG) หรือเอกสาร PDF เท่านั้น"
-            : "❌ Invalid File Type: Only JPG, PNG images or PDF documents are supported.");
+        showPassportErrorUI("❌ ชนิดไฟล์ไม่ถูกต้อง: รองรับเฉพาะไฟล์รูปภาพ (JPG, PNG) หรือเอกสาร PDF เท่านั้น", "❌ Invalid File Type: Only JPG, PNG images or PDF documents are supported.");
         return { valid: false };
     }
 
@@ -507,23 +515,17 @@ async function verifyPassportDocument(file) {
 
                 if (hasPassportWord || hasMRZ || hasDocKeywords) {
                     isPassportVerified = true;
-                    showPassportSuccessUI(currentLanguage === 'th'
-                        ? "✓ ตรวจสอบสำเร็จ: ตรวจพบข้อมูลพาสปอร์ต (Passport) และแถบระบุตัวตนถูกต้อง"
-                        : "✓ Verified: Valid Passport data and identification zone detected.");
+                    showPassportSuccessUI("✓ ตรวจสอบสำเร็จ: ตรวจพบข้อมูลพาสปอร์ต (Passport) และแถบระบุตัวตนถูกต้อง", "✓ Verified: Valid Passport data and identification zone detected.");
                     return { valid: true };
                 } else {
                     isPassportVerified = false;
-                    showPassportErrorUI(currentLanguage === 'th'
-                        ? "❌ เอกสารไม่ถูกต้อง: ไม่พบรูปแบบพาสปอร์ต หรือแถบ MRZ ในไฟล์ที่อัปโหลด กรุณาอัปโหลดรูปพาสปอร์ตที่มีข้อมูลชัดเจน หรือใช้ตัวอย่างด้านล่าง:"
-                        : "❌ Invalid Document: No Passport pattern or MRZ detected in the uploaded file. Please upload a clear passport or use the samples below:");
+                    showPassportErrorUI("❌ เอกสารไม่ถูกต้อง: ไม่พบรูปแบบ Passport หรือแถบ MRZ ในไฟล์ที่อัปโหลด กรุณาอัปโหลดรูปถ่าย Passport ที่มีข้อมูลชัดเจน หรือดาวน์โหลดไฟล์ตัวอย่างด้านล่าง:", "❌ Invalid Document: No Passport pattern or MRZ detected in the uploaded file. Please upload a clear passport or use the samples below:");
                     return { valid: false };
                 }
             } else {
                 // Graceful fallback if Tesseract is loading or blocked by network
                 isPassportVerified = true;
-                showPassportSuccessUI(currentLanguage === 'th'
-                    ? "✓ ตรวจสอบสำเร็จ: ไฟล์เอกสารผ่านการตรวจสอบเบื้องต้น"
-                    : "✓ Verified: Document file passed preliminary check.");
+                showPassportSuccessUI("✓ ตรวจสอบสำเร็จ: ไฟล์เอกสารผ่านการตรวจสอบเบื้องต้น", "✓ Verified: Document file passed preliminary check.");
                 return { valid: true };
             }
         } catch (err) {
@@ -539,9 +541,7 @@ async function verifyPassportDocument(file) {
     // 4. PDF file
     if (isPdf) {
         isPassportVerified = true;
-        showPassportSuccessUI(currentLanguage === 'th'
-            ? "✓ ตรวจสอบสำเร็จ: ไฟล์เอกสาร PDF พาสปอร์ตผ่านการตรวจสอบ"
-            : "✓ Verified: Passport PDF document accepted.");
+        showPassportSuccessUI("✓ ตรวจสอบสำเร็จ: ไฟล์เอกสาร PDF พาสปอร์ตผ่านการตรวจสอบ", "✓ Verified: Passport PDF document accepted.");
         return { valid: true };
     }
 }
@@ -864,6 +864,16 @@ window.setLanguage = function(lang) {
 
     // Refresh DOB feedback in new language
     checkDOBRealTime(true);
+
+    // Refresh passport feedback in new language
+    const passportEl = document.getElementById('passport');
+    if (passportEl && passportEl.files && passportEl.files[0]) {
+        if (isPassportVerified) {
+            showPassportSuccessUI("✓ ตรวจสอบสำเร็จ: ตรวจพบข้อมูลพาสปอร์ต (Passport) และแถบระบุตัวตนถูกต้อง", "✓ Verified: Valid Passport data and identification zone detected.");
+        } else {
+            showPassportErrorUI("❌ เอกสารไม่ถูกต้อง: ไม่พบรูปแบบ Passport หรือแถบ MRZ ในไฟล์ที่อัปโหลด กรุณาอัปโหลดรูปถ่าย Passport ที่มีข้อมูลชัดเจน หรือดาวน์โหลดไฟล์ตัวอย่างด้านล่าง:", "❌ Invalid Document: No Passport pattern or MRZ detected in the uploaded file. Please upload a clear passport or use the samples below:");
+        }
+    }
 
     // Refresh readiness checklist in new language
     if (window.updateReadinessChecklist) {
@@ -1693,8 +1703,54 @@ document.addEventListener("DOMContentLoaded", () => {
                 const methodSelect = document.getElementById('contactMethod');
                 const methodDisplay = methodSelect ? methodSelect.options[methodSelect.selectedIndex].text : 'Email';
                 
-                // 11. Passport/ID File
-                const passportFileName = passport.files[0] ? passport.files[0].name : 'Uploaded Document';
+                // 11. Passport/ID File & Image Preview
+                const passportFile = passport.files && passport.files[0] ? passport.files[0] : null;
+                const passportFileName = passportFile ? passportFile.name : 'Uploaded Document';
+                let passportPreviewHtml = '';
+
+                if (passportFile) {
+                    const isImg = passportFile.type.startsWith('image/') || /\.(jpg|jpeg|png|webp)$/i.test(passportFile.name);
+                    const isSubDir = window.location.pathname.includes('/1/');
+                    const relPath = isSubDir ? '../' : './';
+                    
+                    let imgSrc = '';
+                    if (passportFile.name.toLowerCase().includes('passport_sample')) {
+                        imgSrc = `${relPath}passport_sample.png`;
+                    } else if (passportFile.name.toLowerCase().includes('passport_template')) {
+                        imgSrc = `${relPath}passport_template.png`;
+                    } else {
+                        try {
+                            imgSrc = URL.createObjectURL(passportFile);
+                        } catch(e) {
+                            imgSrc = `${relPath}passport_sample.png`;
+                        }
+                    }
+
+                    if (isImg) {
+                        passportPreviewHtml = `
+                            <div class="summary-passport-box">
+                                <div class="summary-passport-img-wrapper">
+                                    <img src="${imgSrc}" alt="Uploaded Passport" class="summary-passport-img">
+                                </div>
+                                <div class="summary-passport-meta">
+                                    <span class="summary-passport-name">📎 ${passportFileName}</span>
+                                    <span class="summary-passport-badge">${lang === 'th' ? '✓ พาสปอร์ตผ่านการตรวจสอบ' : '✓ Verified Passport'}</span>
+                                </div>
+                            </div>
+                        `;
+                    } else {
+                        passportPreviewHtml = `
+                            <div class="summary-passport-box">
+                                <div class="summary-passport-meta">
+                                    <span class="summary-passport-name">📄 📎 ${passportFileName} (PDF Document)</span>
+                                    <span class="summary-passport-badge">${lang === 'th' ? '✓ ไฟล์ PDF ผ่านการตรวจสอบ' : '✓ Verified PDF'}</span>
+                                </div>
+                            </div>
+                        `;
+                    }
+                } else {
+                    passportPreviewHtml = `<strong class="summary-value">📎 ${passportFileName}</strong>`;
+                }
                 
                 // 12. Additional Comments
                 const commentsVal = comments?.value.trim() || (lang === 'th' ? '(ไม่มีความคิดเห็นเพิ่มเติม)' : '(None)');
@@ -1742,8 +1798,8 @@ document.addEventListener("DOMContentLoaded", () => {
                             <strong class="summary-value">${methodDisplay}</strong>
                         </div>
                         <div class="summary-item full-width">
-                            <span class="summary-label">📄 ${lang === 'th' ? 'ไฟล์เอกสารยืนยันตัวตน' : 'Uploaded Passport / ID'}</span>
-                            <strong class="summary-value">📎 ${passportFileName}</strong>
+                            <span class="summary-label">📄 ${lang === 'th' ? 'ไฟล์เอกสารยืนยันตัวตน (Uploaded Passport / ID)' : 'Uploaded Passport / ID'}</span>
+                            ${passportPreviewHtml}
                         </div>
                         <div class="summary-item full-width">
                             <span class="summary-label">📝 ${lang === 'th' ? 'ความคิดเห็นเพิ่มเติม' : 'Additional Comments'}</span>
@@ -1841,9 +1897,7 @@ window.autoFillForm = function() {
             dt.items.add(dummyFile);
             passport.files = dt.files;
             isPassportVerified = true;
-            showPassportSuccessUI(currentLanguage === 'th'
-                ? "✓ ตรวจสอบสำเร็จ: เป็นเอกสาร Passport ที่ถูกต้องตามมาตรฐาน ICAO 9303"
-                : "✓ Verified: Valid Passport document according to ICAO 9303 standards.");
+            showPassportSuccessUI("✓ ตรวจสอบสำเร็จ: เป็นเอกสาร Passport ที่ถูกต้องตามมาตรฐาน ICAO 9303", "✓ Verified: Valid Passport document according to ICAO 9303 standards.");
         } catch (e) {
             isPassportVerified = true;
         }
