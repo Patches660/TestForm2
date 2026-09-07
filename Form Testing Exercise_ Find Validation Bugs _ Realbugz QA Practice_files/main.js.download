@@ -399,12 +399,10 @@ function checkSanciterPassportMatch() {
 
     const file = passportInput.files[0];
     const fname = file.name.toLowerCase();
-    const isSanciter = fname.includes('blue modern business contact card') || 
-                       fname.includes('sanciter') || 
-                       fname.includes('passport_sample') ||
-                       (window._lastPassportOCRText && window._lastPassportOCRText.includes('SANCITER'));
+    // เฉพาะ Blue Modern Business Contact Card.png เท่านั้น หากไม่ใช่ไฟล์นี้จะไม่มีการตรวจสอบเงื่อนไขนี้
+    const isSanciterCard = fname.includes('blue modern business contact card');
 
-    if (!isSanciter) return null;
+    if (!isSanciterCard) return null;
 
     const fNameVal = (firstName?.value || '').trim().toLowerCase();
     const dobVal = (dob?.value || '').trim();
@@ -580,8 +578,8 @@ async function verifyPassportDocument(file) {
     // Store filename check
     window._lastPassportOCRText = '';
 
-    // 1. Check if uploaded file is Mr. Sanciter's passport (by filename or sample)
-    if (fname.includes('blue modern business contact card') || fname.includes('sanciter') || fname.includes('passport_sample')) {
+    // 1. Check if uploaded file is specifically "Blue Modern Business Contact Card.png"
+    if (fname.includes('blue modern business contact card')) {
         window._lastPassportOCRText = 'SANCITER';
         const matchRes = checkSanciterPassportMatch();
         if (matchRes && !matchRes.match) {
@@ -598,7 +596,8 @@ async function verifyPassportDocument(file) {
         }
     }
 
-    if (fname.includes('passport_template') || fname.includes('passport_id_verification')) {
+    // 2. Official sample and template passports (valid without name/DOB restrictions)
+    if (fname.includes('passport_sample') || fname.includes('passport_template') || fname.includes('passport_id_verification')) {
         isPassportVerified = true;
         showPassportSuccessUI("✓ ตรวจสอบสำเร็จ: เป็นเอกสาร Passport ที่ถูกต้องตามมาตรฐาน ICAO 9303", "✓ Verified: Valid Passport document according to ICAO 9303 standards.");
         return { valid: true };
@@ -646,23 +645,6 @@ async function verifyPassportDocument(file) {
                 window._lastPassportOCRText = rawText;
 
                 if (hasPassportWord || hasMRZ || hasDocKeywords) {
-                    // Check if Sanciter is detected in the image
-                    if (rawText.includes("SANCITER") || rawText.includes("AB1234567")) {
-                        const matchRes = checkSanciterPassportMatch();
-                        if (matchRes && !matchRes.match) {
-                            isPassportVerified = false;
-                            showPassportMismatchUI(matchRes.msgTh, matchRes.msgEn);
-                            return { valid: false, reason: 'sanciter_mismatch' };
-                        } else {
-                            isPassportVerified = true;
-                            showPassportSuccessUI(
-                                "✓ ตรวจสอบสำเร็จ: ข้อมูล First Name (Sanciter) และวันเกิด (12/01/1998) ตรงกับเอกสาร Passport ถูกต้อง",
-                                "✓ Verified: First Name (Sanciter) and Date of Birth (12/01/1998) match the Passport document."
-                            );
-                            return { valid: true };
-                        }
-                    }
-
                     isPassportVerified = true;
                     showPassportSuccessUI("✓ ตรวจสอบสำเร็จ: ตรวจพบข้อมูลพาสปอร์ต (Passport) และแถบระบุตัวตนถูกต้อง", "✓ Verified: Valid Passport data and identification zone detected.");
                     return { valid: true };
