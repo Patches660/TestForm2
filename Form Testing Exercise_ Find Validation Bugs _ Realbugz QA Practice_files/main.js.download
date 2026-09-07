@@ -43,7 +43,9 @@ const i18n = {
                 "label-passport": "Upload Passport/ID* (JPG, PNG, PDF)",
         "passport-dl-title": "📥 Download Sample Passport for Testing:",
         "passport-btn-sample": "📄 Sample Passport (Ready to use)",
-        "passport-btn-template": "🎨 Blank Passport Template (P<)", 
+        "passport-sub-sample": "Mr. Sanciter (File 1)",
+        "passport-btn-template": "🎨 Blank Passport Template (P<)",
+        "passport-sub-template": "Template P< (File 2)", 
         "label-comments": "Additional Comments (Optional)",
         "label-terms": "I Agree to the",
         "label-terms-link": "Terms and Conditions*",
@@ -152,7 +154,9 @@ const i18n = {
                 "label-passport": "อัปโหลดพาสปอร์ต/บัตรประชาชน* (JPG, PNG, PDF)",
         "passport-dl-title": "📥 ดาวน์โหลดไฟล์พาสปอร์ตตัวอย่างสำหรับทดสอบ:",
         "passport-btn-sample": "📄 พาสปอร์ตตัวอย่าง (พร้อมใช้)",
-        "passport-btn-template": "🎨 เทมเพลตพาสปอร์ตเปล่า (P<)", 
+        "passport-sub-sample": "Mr. Sanciter (ไฟล์ที่ 1)",
+        "passport-btn-template": "🎨 เทมเพลตพาสปอร์ตเปล่า (P<)",
+        "passport-sub-template": "เทมเพลต P< (ไฟล์ที่ 2)", 
         "label-comments": "ความคิดเห็นเพิ่มเติม (ไม่บังคับ)",
         "label-terms": "ฉันยอมรับ",
         "label-terms-link": "ข้อตกลงและเงื่อนไข*",
@@ -385,6 +389,9 @@ function checkDOBRealTime(showFeedback = true) {
 // Passport OCR Verification & Dynamic Sample Downloads
 // =======================================================
 let isPassportVerified = false;
+let lastPassportStatus = null; // 'success' | 'error' | 'file_type_error'
+let lastPassportMsgTh = '';
+let lastPassportMsgEn = '';
 
 function showPassportScanningUI() {
     const feedbackEl = document.getElementById('passportFeedback');
@@ -395,7 +402,7 @@ function showPassportScanningUI() {
         feedbackEl.className = 'passport-feedback visible scanning';
         feedbackEl.innerHTML = `
             <span class="passport-spinner"></span>
-            <span class="passport-scan-text">${currentLanguage === 'th' ? 'กำลังสแกนตรวจสอบเอกสาร Passport ด้วย AI... (รอสักครู่)' : 'Scanning Passport Document with AI... (Please wait)'}</span>
+            <span class="passport-scan-text">${currentLanguage === 'th' ? 'กำลังสแกนตรวจสอบเอกสาร Passport ด้วย AI...' : 'Scanning Passport Document with AI...'}</span>
         `;
     }
     if (dlBox) dlBox.style.display = 'none';
@@ -407,15 +414,15 @@ function showPassportSuccessUI(msgTh, msgEn) {
     const dlBox = document.getElementById('passportDownloadBox');
     const passportInput = document.getElementById('passport');
 
-    const primaryMsg = currentLanguage === 'th' ? msgTh : msgEn;
-    const secondaryMsg = currentLanguage === 'th' ? msgEn : msgTh;
+    lastPassportStatus = 'success';
+    lastPassportMsgTh = msgTh;
+    lastPassportMsgEn = msgEn;
+
+    const displayMsg = currentLanguage === 'th' ? msgTh : msgEn;
 
     if (feedbackEl) {
         feedbackEl.className = 'passport-feedback visible success';
-        feedbackEl.innerHTML = `
-            <div>${primaryMsg}</div>
-            <span class="passport-sub-text">(${secondaryMsg})</span>
-        `;
+        feedbackEl.textContent = displayMsg;
     }
     if (dlBox) dlBox.style.display = 'none';
     if (passportInput) {
@@ -425,20 +432,20 @@ function showPassportSuccessUI(msgTh, msgEn) {
     if (window.updateReadinessChecklist) window.updateReadinessChecklist();
 }
 
-function showPassportErrorUI(msgTh, msgEn) {
+function showPassportErrorUI(msgTh, msgEn, statusKey = 'error') {
     const feedbackEl = document.getElementById('passportFeedback');
     const dlBox = document.getElementById('passportDownloadBox');
     const passportInput = document.getElementById('passport');
 
-    const primaryMsg = currentLanguage === 'th' ? msgTh : msgEn;
-    const secondaryMsg = currentLanguage === 'th' ? msgEn : msgTh;
+    lastPassportStatus = statusKey;
+    lastPassportMsgTh = msgTh;
+    lastPassportMsgEn = msgEn;
+
+    const displayMsg = currentLanguage === 'th' ? msgTh : msgEn;
 
     if (feedbackEl) {
         feedbackEl.className = 'passport-feedback visible error';
-        feedbackEl.innerHTML = `
-            <div>${primaryMsg}</div>
-            <span class="passport-sub-text">${secondaryMsg}</span>
-        `;
+        feedbackEl.textContent = displayMsg;
     }
     if (dlBox) dlBox.style.display = 'block';
     if (passportInput) {
@@ -455,6 +462,9 @@ async function verifyPassportDocument(file) {
 
     if (!file) {
         isPassportVerified = false;
+        lastPassportStatus = null;
+        lastPassportMsgTh = '';
+        lastPassportMsgEn = '';
         if (feedbackEl) {
             feedbackEl.className = 'passport-feedback';
             feedbackEl.textContent = '';
@@ -865,17 +875,13 @@ window.setLanguage = function(lang) {
     // Refresh DOB feedback in new language
     checkDOBRealTime(true);
 
-    // Refresh passport feedback in new language
-    const passportEl = document.getElementById('passport');
-    if (passportEl && passportEl.files && passportEl.files[0]) {
-        if (isPassportVerified) {
-            showPassportSuccessUI("✓ ตรวจสอบสำเร็จ: ตรวจพบข้อมูลพาสปอร์ต (Passport) และแถบระบุตัวตนถูกต้อง", "✓ Verified: Valid Passport data and identification zone detected.");
-        } else {
-            showPassportErrorUI("❌ เอกสารไม่ถูกต้อง: ไม่พบรูปแบบ Passport หรือแถบ MRZ ในไฟล์ที่อัปโหลด กรุณาอัปโหลดรูปถ่าย Passport ที่มีข้อมูลชัดเจน หรือดาวน์โหลดไฟล์ตัวอย่างด้านล่าง:", "❌ Invalid Document: No Passport pattern or MRZ detected in the uploaded file. Please upload a clear passport or use the samples below:");
-        }
+    // Refresh passport feedback in new language (display only active language)
+    const feedbackEl = document.getElementById('passportFeedback');
+    if (feedbackEl && lastPassportStatus) {
+        const msg = currentLanguage === 'th' ? lastPassportMsgTh : lastPassportMsgEn;
+        feedbackEl.textContent = msg;
     }
 
-    // Refresh readiness checklist in new language
     if (window.updateReadinessChecklist) {
         window.updateReadinessChecklist();
     }
