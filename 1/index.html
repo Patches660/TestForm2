@@ -11,7 +11,9 @@
     <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
     
     <!-- Stylesheet with Cache Buster (?v=3) -->
-    <link rel="stylesheet" href="../Form Testing Exercise_ Find Validation Bugs _ Realbugz QA Practice_files/main.css?v=215">
+    <link rel="stylesheet" href="../Form Testing Exercise_ Find Validation Bugs _ Realbugz QA Practice_files/main.css?v=216">
+    <!-- Tesseract.js Official OCR SDK for Client-Side Passport Verification -->
+    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
     <!-- EmailJS Official Browser SDK -->
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 </head>
@@ -258,6 +260,22 @@
                     <div class="form-group">
                         <label for="passport" data-i18n="label-passport">Upload Passport/ID* (JPG, PNG, PDF)</label>
                         <input type="file" id="passport" name="passport" accept=".jpg, .jpeg, .png, .pdf" required>
+                        <div id="passportFeedback" class="passport-feedback"></div>
+                        <div id="passportDownloadBox" class="passport-download-box" style="display: none;">
+                            <div class="passport-download-title" data-i18n="passport-dl-title">
+                                📥 ดาวน์โหลดไฟล์พาสปอร์ตตัวอย่างสำหรับทดสอบ:
+                            </div>
+                            <div class="passport-btn-group">
+                                <a href="../passport_sample.png" download="passport_sample.png" class="btn-passport-dl sample">
+                                    <span class="btn-dl-main" data-i18n="passport-btn-sample">📄 พาสปอร์ตตัวอย่าง (พร้อมใช้)</span>
+                                    <span class="btn-dl-sub">Mr. Sanciter (ไฟล์ที่ 1)</span>
+                                </a>
+                                <a href="../passport_template.png" download="passport_template.png" class="btn-passport-dl template">
+                                    <span class="btn-dl-main" data-i18n="passport-btn-template">🎨 เทมเพลตพาสปอร์ตเปล่า</span>
+                                    <span class="btn-dl-sub">Template P&lt; (ไฟล์ที่ 2)</span>
+                                </a>
+                            </div>
+                        </div>
                     </div>
 
                     <div class="form-group">
