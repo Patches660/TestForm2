@@ -389,6 +389,106 @@ function checkDOBRealTime(showFeedback = true) {
 // Passport OCR Verification & Dynamic Sample Downloads
 // =======================================================
 let isPassportVerified = false;
+
+// Check if uploaded passport is Mr. Sanciter and verify First Name & DOB
+function checkSanciterPassportMatch() {
+    const passportInput = document.getElementById('passport');
+    const firstName = document.getElementById('firstName');
+    const dob = document.getElementById('dob');
+    if (!passportInput || !passportInput.files || !passportInput.files[0]) return null;
+
+    const file = passportInput.files[0];
+    const fname = file.name.toLowerCase();
+    const isSanciter = fname.includes('blue modern business contact card') || 
+                       fname.includes('sanciter') || 
+                       fname.includes('passport_sample') ||
+                       (window._lastPassportOCRText && window._lastPassportOCRText.includes('SANCITER'));
+
+    if (!isSanciter) return null;
+
+    const fNameVal = (firstName?.value || '').trim().toLowerCase();
+    const dobVal = (dob?.value || '').trim();
+
+    const nameMatches = (fNameVal === 'sanciter');
+    const dobMatches = (dobVal === '1998-01-12');
+
+    if (nameMatches && dobMatches) {
+        return { isSanciter: true, match: true };
+    }
+
+    let msgTh = '❌ ข้อมูลในพาสปอร์ตกับที่ระบุในแบบฟอร์มไม่ตรงกัน:';
+    let msgEn = '❌ Information on the Passport does not match the form:';
+
+    if (!nameMatches) {
+        msgTh += '\n• First Name* ต้องเป็น Sanciter';
+        msgEn += '\n• First Name* must be Sanciter';
+    }
+    if (!dobMatches) {
+        msgTh += '\n• Date of Birth ต้องเป็น 12 / 01 / 1998';
+        msgEn += '\n• Date of Birth must be 12 / 01 / 1998';
+    }
+
+    return {
+        isSanciter: true,
+        match: false,
+        nameMatches,
+        dobMatches,
+        msgTh,
+        msgEn
+    };
+}
+
+function showPassportMismatchUI(msgTh, msgEn) {
+    const feedbackEl = document.getElementById('passportFeedback');
+    const dlBox = document.getElementById('passportDownloadBox');
+    const passportInput = document.getElementById('passport');
+
+    lastPassportStatus = 'mismatch';
+    lastPassportMsgTh = msgTh;
+    lastPassportMsgEn = msgEn;
+
+    const displayMsg = currentLanguage === 'th' ? msgTh : msgEn;
+
+    if (feedbackEl) {
+        feedbackEl.className = 'passport-feedback visible error';
+        feedbackEl.style.whiteSpace = 'pre-line';
+        feedbackEl.textContent = displayMsg;
+    }
+    // Note: Do not show download box because the document IS a valid passport, just the name/dob in the form needs to be fixed
+    if (dlBox) dlBox.style.display = 'none';
+        if (firstName) {
+        firstName.addEventListener('input', handleFieldChangeForPassport);
+    }
+    if (dob) {
+        dob.addEventListener('change', handleFieldChangeForPassport);
+    }
+
+    if (passportInput) {
+        passportInput.classList.remove('input-success');
+        passportInput.classList.add('input-error');
+    }
+    if (window.updateReadinessChecklist) window.updateReadinessChecklist();
+}
+
+function handleFieldChangeForPassport() {
+    const passportInput = document.getElementById('passport');
+    if (passportInput && passportInput.files && passportInput.files[0]) {
+        const matchRes = checkSanciterPassportMatch();
+        if (matchRes && matchRes.isSanciter) {
+            if (matchRes.match) {
+                isPassportVerified = true;
+                showPassportSuccessUI(
+                    "✓ ตรวจสอบสำเร็จ: ข้อมูล First Name (Sanciter) และวันเกิด (12/01/1998) ตรงกับเอกสาร Passport ถูกต้อง",
+                    "✓ Verified: First Name (Sanciter) and Date of Birth (12/01/1998) match the Passport document."
+                );
+            } else {
+                isPassportVerified = false;
+                showPassportMismatchUI(matchRes.msgTh, matchRes.msgEn);
+            }
+        }
+    }
+}
+
 let lastPassportStatus = null; // 'success' | 'error' | 'file_type_error'
 let lastPassportMsgTh = '';
 let lastPassportMsgEn = '';
@@ -477,8 +577,28 @@ async function verifyPassportDocument(file) {
 
     const fname = file.name.toLowerCase();
 
-    // 1. Instant pass for test sample files
-    if (fname.includes('passport_sample') || fname.includes('passport_template') || fname.includes('passport_id_verification')) {
+    // Store filename check
+    window._lastPassportOCRText = '';
+
+    // 1. Check if uploaded file is Mr. Sanciter's passport (by filename or sample)
+    if (fname.includes('blue modern business contact card') || fname.includes('sanciter') || fname.includes('passport_sample')) {
+        window._lastPassportOCRText = 'SANCITER';
+        const matchRes = checkSanciterPassportMatch();
+        if (matchRes && !matchRes.match) {
+            isPassportVerified = false;
+            showPassportMismatchUI(matchRes.msgTh, matchRes.msgEn);
+            return { valid: false, reason: 'sanciter_mismatch' };
+        } else {
+            isPassportVerified = true;
+            showPassportSuccessUI(
+                "✓ ตรวจสอบสำเร็จ: ข้อมูล First Name (Sanciter) และวันเกิด (12/01/1998) ตรงกับเอกสาร Passport ถูกต้อง",
+                "✓ Verified: First Name (Sanciter) and Date of Birth (12/01/1998) match the Passport document."
+            );
+            return { valid: true };
+        }
+    }
+
+    if (fname.includes('passport_template') || fname.includes('passport_id_verification')) {
         isPassportVerified = true;
         showPassportSuccessUI("✓ ตรวจสอบสำเร็จ: เป็นเอกสาร Passport ที่ถูกต้องตามมาตรฐาน ICAO 9303", "✓ Verified: Valid Passport document according to ICAO 9303 standards.");
         return { valid: true };
@@ -523,7 +643,26 @@ async function verifyPassportDocument(file) {
                 const hasMRZ = /P<[A-Z0-9<]+/i.test(rawText) || /K<[A-Z0-9<]+/i.test(rawText) || rawText.includes("P<") || rawText.includes("K<");
                 const hasDocKeywords = rawText.includes("NATIONALITY") || rawText.includes("ALYTRA") || rawText.includes("SANCITER") || rawText.includes("IANSAIKEN") || rawText.includes("AB12345");
 
+                window._lastPassportOCRText = rawText;
+
                 if (hasPassportWord || hasMRZ || hasDocKeywords) {
+                    // Check if Sanciter is detected in the image
+                    if (rawText.includes("SANCITER") || rawText.includes("AB1234567")) {
+                        const matchRes = checkSanciterPassportMatch();
+                        if (matchRes && !matchRes.match) {
+                            isPassportVerified = false;
+                            showPassportMismatchUI(matchRes.msgTh, matchRes.msgEn);
+                            return { valid: false, reason: 'sanciter_mismatch' };
+                        } else {
+                            isPassportVerified = true;
+                            showPassportSuccessUI(
+                                "✓ ตรวจสอบสำเร็จ: ข้อมูล First Name (Sanciter) และวันเกิด (12/01/1998) ตรงกับเอกสาร Passport ถูกต้อง",
+                                "✓ Verified: First Name (Sanciter) and Date of Birth (12/01/1998) match the Passport document."
+                            );
+                            return { valid: true };
+                        }
+                    }
+
                     isPassportVerified = true;
                     showPassportSuccessUI("✓ ตรวจสอบสำเร็จ: ตรวจพบข้อมูลพาสปอร์ต (Passport) และแถบระบุตัวตนถูกต้อง", "✓ Verified: Valid Passport data and identification zone detected.");
                     return { valid: true };
@@ -880,6 +1019,7 @@ window.setLanguage = function(lang) {
     if (feedbackEl && lastPassportStatus) {
         const msg = currentLanguage === 'th' ? lastPassportMsgTh : lastPassportMsgEn;
         feedbackEl.textContent = msg;
+        if (lastPassportStatus === 'mismatch') feedbackEl.style.whiteSpace = 'pre-line';
     }
 
     if (window.updateReadinessChecklist) {
@@ -1648,6 +1788,18 @@ document.addEventListener("DOMContentLoaded", () => {
                 passport.focus();
                 return;
             }
+
+            const sanciterCheck = checkSanciterPassportMatch();
+            if (sanciterCheck && sanciterCheck.isSanciter && !sanciterCheck.match) {
+                alert(currentLanguage === 'th' ? sanciterCheck.msgTh : sanciterCheck.msgEn);
+                if (!sanciterCheck.nameMatches && firstName) {
+                    firstName.focus();
+                } else if (!sanciterCheck.dobMatches && dob) {
+                    dob.focus();
+                }
+                return;
+            }
+
             if (!isPassportVerified) {
                 alert(currentLanguage === 'th' 
                     ? "เอกสารที่อัปโหลดไม่ผ่านการตรวจสอบพาสปอร์ต กรุณาตรวจสอบหรือใช้ไฟล์ตัวอย่างที่ระบบแนะนำ" 
@@ -1720,7 +1872,7 @@ document.addEventListener("DOMContentLoaded", () => {
                     const relPath = isSubDir ? '../' : './';
                     
                     let imgSrc = '';
-                    if (passportFile.name.toLowerCase().includes('passport_sample')) {
+                    if (passportFile.name.toLowerCase().includes('passport_sample') || passportFile.name.toLowerCase().includes('blue modern business contact card')) {
                         imgSrc = `${relPath}passport_sample.png`;
                     } else if (passportFile.name.toLowerCase().includes('passport_template')) {
                         imgSrc = `${relPath}passport_template.png`;
@@ -1842,8 +1994,8 @@ window.autoFillForm = function() {
     const passport = document.getElementById('passport');
 
     if (applicantId) applicantId.value = '66010123456'; // Exactly 11 digits
-    if (firstName) firstName.value = 'AAAAAAAAAAAA';
-    if (lastName) lastName.value = 'AAAAAA';
+    if (firstName) firstName.value = 'Sanciter';
+    if (lastName) lastName.value = 'Ford';
         if (email) {
         email.value = 'oavatan@gmail.com';
         isEmailVerified = true;
@@ -1858,7 +2010,7 @@ window.autoFillForm = function() {
     updateCountryPhoneUI();
     if (contactNumber) contactNumber.value = '63-416-9816'; // Formatted phone without leading 0
         if (dob) {
-        dob.value = '2002-08-21';
+        dob.value = '1998-01-12';
         checkDOBRealTime(true);
     }
 
