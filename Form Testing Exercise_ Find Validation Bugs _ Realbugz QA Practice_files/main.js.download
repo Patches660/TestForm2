@@ -1853,14 +1853,13 @@ document.addEventListener("DOMContentLoaded", () => {
                     const relPath = isSubDir ? '../' : './';
                     
                     let imgSrc = '';
-                    if (passportFile.name.toLowerCase().includes('passport_sample') || passportFile.name.toLowerCase().includes('blue modern business contact card')) {
-                        imgSrc = `${relPath}passport_sample.png`;
-                    } else if (passportFile.name.toLowerCase().includes('passport_template')) {
-                        imgSrc = `${relPath}passport_template.png`;
-                    } else {
-                        try {
-                            imgSrc = URL.createObjectURL(passportFile);
-                        } catch(e) {
+                    try {
+                        imgSrc = URL.createObjectURL(passportFile);
+                    } catch(e) {
+                        const lowName = passportFile.name.toLowerCase();
+                        if (lowName.includes('template') || lowName.includes('ex')) {
+                            imgSrc = `${relPath}passport_template.png`;
+                        } else {
                             imgSrc = `${relPath}passport_sample.png`;
                         }
                     }
